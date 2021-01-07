@@ -13,7 +13,7 @@ class View
 {
     use UrlQueryManager;
 
-    protected string $dir = '';
+    protected string $templateDir = '';
     protected string $templateFileName = '';
     protected string $title = '';
     protected array $templateParams = [];
@@ -26,7 +26,7 @@ class View
 
     public function renderPart(string $name, array $data = []): string
     {
-        $viewFilePath = $this->dir . $name . $this->viewFileExtension;
+        $viewFilePath = $this->templateDir . $name . $this->viewFileExtension;
         if (!is_readable($viewFilePath)) {
             throw new RuntimeException('View file "' . $viewFilePath. '" not found');
         }
@@ -48,7 +48,7 @@ class View
         }
 
         // warning: variables will be replace in template from template part
-        $viewFilePath = $this->dir . $this->templateFileName . $this->viewFileExtension;
+        $viewFilePath = $this->templateDir . $this->templateFileName . $this->viewFileExtension;
 
         ob_start();
         ob_implicit_flush(0); // PHP 8 requires bool?
@@ -115,14 +115,14 @@ class View
         return $this->templateParams;
     }
 
-    public function setDir(string $name): void
+    public function setTemplateDir(string $name): void
     {
-        $this->dir = $name;
+        $this->templateDir = $name;
     }
 
-    public function getDir(): string
+    public function getTemplateDir(): string
     {
-        return $this->dir;
+        return $this->templateDir;
     }
 
     public function setTemplateFileName(string $name): void

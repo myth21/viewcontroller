@@ -14,7 +14,8 @@ class AppWeb extends App
 {
     protected const PUT_REQUEST_METHOD = 'PUT';
     protected const POST_REQUEST_METHOD = 'POST';
-    // TODO other methods
+    protected const DELETE_REQUEST_METHOD = 'DELETE';
+    // other methods...
 
     protected string $requestMethod = 'GET';
     protected bool $isAjaxRequest = false;
@@ -65,6 +66,11 @@ class AppWeb extends App
     public function isPostRequest(): bool
     {
         return $this->requestMethod === static::POST_REQUEST_METHOD;
+    }
+
+    public function isDeleteRequest(): bool
+    {
+        return $this->requestMethod === static::DELETE_REQUEST_METHOD;
     }
 
     protected function getControllerNameSpace(): string

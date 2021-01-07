@@ -19,7 +19,7 @@ abstract class WebController extends Controller
         $this->view = new View();
 
         $dir = $dir ?: $this->app->getParam('defaultViewDirName') . $this->app->getParam('defaultTemplateDirName');
-        $this->view->setDir($dir);
+        $this->view->setTemplateDir($dir);
 
         $templateFileName = $templateFileName ?: $this->app->getParam('defaultTemplateFileName');
         $this->view->setTemplateFileName($templateFileName);
