@@ -1,0 +1,22 @@
+{
+    "name": "myth21/viewcontroller",
+    "description": "A mere example of an ViewController app written PHP",
+    "keywords": ["php", "mere", "mvc", "vc", "framework"],
+    "homepage": "https://github.com/myth21/viewcontroller",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ivan M.",
+            "email": "ivan.malukhin@gmail.com"
+        }
+    ],
+    "require": {
+        "ext-pdo": "*",
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "myth21\\viewcontroller\\": ""
+        }
+    }
+}
