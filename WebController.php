@@ -14,19 +14,6 @@ abstract class WebController extends Controller
 
     protected ResponseHeader $response;
 
-    public function createView(string $dir = '', string $templateFileName = ''): View
-    {
-        $this->view = new View();
-
-        $dir = $dir ?: $this->app->getParam('defaultViewDirName') . $this->app->getParam('defaultTemplateDirName');
-        $this->view->setTemplateDir($dir);
-
-        $templateFileName = $templateFileName ?: $this->app->getParam('defaultTemplateFileName');
-        $this->view->setTemplateFileName($templateFileName);
-
-        return $this->view;
-    }
-
     protected function redirect(string $controller, string $action): void
     {
         $url = $this->createUrl($controller, $action);

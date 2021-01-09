@@ -16,6 +16,73 @@ composer require myth21/viewcontroller
 ```
 Or download project and use how you want.
 
+App waiting for params
+-
+```php
+<?php
+
+declare(strict_types=1);
+
+return [
+    // common
+    'isCleanUrlApply' => true, // https://en.wikipedia.org/wiki/Clean_URL
+    'webControllerNameSpace' => '\\app\\controller\\',
+    'defaultControllerName' => 'Index',
+    'defaultActionName' => 'index',
+    'exceptionControllerName' => 'Exception', // optional
+    'exceptionMethodName' => 'handle', // optional
+    'moduleNameSpace' => '\\module\\', // optional
+    'moduleControllerNameSpace' => '\\controller\\', // optional
+    // view
+    'defaultViewDirName' => 'view',
+    'defaultTemplateDirName' => 'default',
+    'defaultTemplateFileName' => 'template',
+    // routes
+    'routes' => [
+        '/' => [
+            'name' => 'home',
+            'method' => 'GET|POST',
+            'func' => function() {
+                return [
+                    'controller' => 'Home',
+                    'action' => 'index',
+                ];
+            },
+        ],
+        '/module/[a:module]/' => [ // optional
+            'name' => 'module',
+            'method' => 'GET|POST|PUT|DELETE',
+            'func' => function ($module) {
+                return [
+                    'module' => $module,
+                    'controller' => 'Index',
+                    'action' => 'index',
+                ];
+            }
+        ],
+        '/[a:controller]/[a:action]/' => [
+            'name' => 'default',
+            'method' => 'GET|POST',
+            'func' => function ($controller, $action) {
+                return [
+                    'controller' => $controller,
+                    'action' => $action
+                ];
+            },
+        ],
+    ],
+    // modules (optional)
+    'modules' => [
+        'rest' => new class {}
+    ],
+
+    // console (optional)
+    'consoleControllerNameSpace' => '\\admin\\console\\',
+    'migrationNameSpace' => '\\admin\\console\\migration\\',
+    'migrationDirName' =>  'migration',
+];
+```
+
 License
 -
 MIT License

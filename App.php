@@ -130,6 +130,7 @@ abstract class App implements IApp
     protected function checkActionAvailableToRun(): void
     {
         // Using this function will use any registered auto loaders if the class has not already been known
+        // It uses psr-4...
         if (!method_exists($this->controllerClassName, $this->actionName)) {
             throw new BadMethodCallException('Action is not available to run', 404);
         }
