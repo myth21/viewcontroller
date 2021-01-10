@@ -18,7 +18,7 @@ use \RuntimeException;
  * Class AltoRouter
  * @package myth21\viewcontroller
  */
-class AltoRouter extends Router
+class AltoRouter implements Router
 {
 
     /**
@@ -138,7 +138,7 @@ class AltoRouter extends Router
      * @param string|null $name Optional name of this route. Supply if you want to reverse route this url in your application.
      * @throws Exception
      */
-    public function map(string $method, string $route, $target, string $name = null)
+    public function map(string $method, string $route, $target, string $name = null): void
     {
         $this->routes[] = [$method, $route, $target, $name];
 
@@ -160,7 +160,7 @@ class AltoRouter extends Router
      * @return string The URL of the route with named parameters in place.
      * @throws Exception
      */
-    public function generate(string $routeName, array $params = [])
+    public function generate(string $routeName, array $params = []): string
     {
         // Check if named route exists
         if (!isset($this->namedRoutes[$routeName])) {

@@ -15,7 +15,7 @@ use BadMethodCallException;
  * @package myth21\viewcontroller
  * @property Throwable[] $throwableChain
  */
-abstract class App implements IApp
+abstract class App implements Engine
 {
     use UrlQueryManager;
 

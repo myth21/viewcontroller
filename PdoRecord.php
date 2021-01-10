@@ -17,7 +17,7 @@ use PDO;
  * @property string $dsn
  * @property PDO $pdo
  */
-class PdoRecord implements IPdoRecord
+class PdoRecord implements TableRecord
 {
     protected const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     protected const DATE_FORMAT = 'Y-m-d';
