@@ -11,8 +11,7 @@
         }
     ],
     "require": {
-        "ext-pdo": "*",
-        "php": ">=7.4"
+        "ext-pdo": "*"
     },
     "autoload": {
         "psr-4": {
