@@ -17,5 +17,10 @@
         "psr-4": {
             "myth21\\viewcontroller\\": ""
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Myth21\\Viewcontroller\\": "src/"
+        }
     }
 }

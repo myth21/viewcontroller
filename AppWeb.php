@@ -12,12 +12,14 @@ use RuntimeException;
  */
 class AppWeb extends App
 {
-    protected const PUT_REQUEST_METHOD = 'PUT';
+    protected const HEAD_REQUEST_METHOD = 'HEAD';
+    protected const GET_REQUEST_METHOD = 'GET';
     protected const POST_REQUEST_METHOD = 'POST';
+    protected const PUT_REQUEST_METHOD = 'PUT';
     protected const DELETE_REQUEST_METHOD = 'DELETE';
     // other methods...
 
-    protected string $requestMethod = 'GET';
+    protected ?string $requestMethod = null;
     protected bool $isAjaxRequest = false;
     protected Session $session;
     protected ?ResponseHeader $responseHeader = null;
