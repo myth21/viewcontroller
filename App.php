@@ -243,14 +243,18 @@ abstract class App implements Engine
         $this->throwableChain[] = $e;
     }
 
-    public function shiftThrowableChain(): ?Throwable
+    public function getFirstThrowable(): ?Throwable
     {
-        return array_shift($this->throwableChain);
+        $key = array_key_first($this->throwableChain);
+
+        return $this->throwableChain[$key] ?? null;
     }
 
-    public function popThrowableChain(): ?Throwable
+    public function getLastThrowable(): ?Throwable
     {
-        return array_pop($this->throwableChain);
+        $key = array_key_last($this->throwableChain);
+
+        return $this->throwableChain[$key] ?? null;
     }
 
     public function getThrowableChain(): array
