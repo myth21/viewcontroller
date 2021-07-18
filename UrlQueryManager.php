@@ -14,6 +14,11 @@ trait UrlQueryManager
         return 'module';
     }
 
+    public function getApiKey(): string
+    {
+        return 'api';
+    }
+
     public function getControllerKey(): string
     {
         return 'controller';

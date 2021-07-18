@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
+use http\Exception\RuntimeException;
+
 /**
  * Class Session
  * @package myth21\viewcontroller
@@ -14,7 +16,12 @@ class Session
 
     public function __construct()
     {
+        if (headers_sent()) {
+            throw new \RuntimeException('Headers have already been sent');
+        }
+
         session_start();
+
         $this->data =& $_SESSION;
     }
 

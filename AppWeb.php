@@ -31,14 +31,11 @@ class AppWeb extends App
         $this->session = new Session();
     }
 
-    protected function setRequestParams(): void
+    protected function defineRequestParams(): void
     {
         $this->requestParams = $_REQUEST;
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
-
-        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
-            $this->isAjaxRequest = true;
-        }
+        $this->isAjaxRequest = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
     }
 
     public function isAjaxRequest(): bool
@@ -48,9 +45,9 @@ class AppWeb extends App
 
     public function getSession(): Session
     {
-        if (is_null($this->session)) {
-            throw new RuntimeException(Session::class . ' is not set');
-        }
+//        if (is_null($this->session)) {
+//            throw new RuntimeException(Session::class . ' is not set');
+//        }
 
         return $this->session;
     }
@@ -63,6 +60,11 @@ class AppWeb extends App
     public function isPutRequest(): bool
     {
         return $this->requestMethod === static::PUT_REQUEST_METHOD;
+    }
+
+    public function isGetRequest(): bool
+    {
+        return $this->requestMethod === static::GET_REQUEST_METHOD;
     }
 
     public function isPostRequest(): bool
@@ -105,5 +107,6 @@ class AppWeb extends App
     {
         return $this->responseHeader;
     }
+
 
 }

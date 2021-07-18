@@ -1,4 +1,4 @@
-A simple example of an MVC app written PHP
+A simple example of a MVC app written PHP
 =
 The app defines controller and action to run.
 Default params are used to run the app.

@@ -19,18 +19,19 @@ abstract class App implements Engine
 {
     use UrlQueryManager;
 
-    private array $params;
+    private array $params = [];
     private ?Router $router;
     private ?string $moduleName;
+    private ?string $apiName;
     private ?string $controllerName;
     private ?string $controllerClassName;
-    private array $throwableChain;
+    private array $throwableChain = [];
 
-    protected array $requestParams;
+    protected array $requestParams = [];
     protected object $controller;
     protected string $actionName;
 
-    abstract protected function setRequestParams(): void;
+    abstract protected function defineRequestParams(): void;
 
     abstract protected function getControllerNameSpace(): string;
 
@@ -53,7 +54,7 @@ abstract class App implements Engine
 
     public function run()
     {
-        $this->setRequestParams();
+        $this->defineRequestParams();
 
         try {
             if ($this->isCleanUrlApply() && $route = $this->createRoute()) {
@@ -63,6 +64,7 @@ abstract class App implements Engine
             }
 
             $this->setModuleName($this->getRequestModuleName());
+            $this->setApiName($this->getRequestApiName());
             $this->setControllerName($this->getRequestControllerName());
             $this->setActionName($this->getRequestActionName());
             $this->defineControllerClassName();
@@ -115,9 +117,16 @@ abstract class App implements Engine
     {
         $controllerName = $this->getControllerName() . ucfirst($this->getControllerKey());
 
-        if (!$doSearchInApp && $this->moduleName) {
+        if (!$doSearchInApp && $this->apiName) {
+
+            $controllerClassName = $this->params['apiNameSpace'] . $this->apiName . $this->params['apiControllerNameSpace'] . $controllerName;
+
+        } elseif (!$doSearchInApp && $this->moduleName) {
+
             $controllerClassName = $this->params['moduleNameSpace'] . $this->moduleName . $this->params['moduleControllerNameSpace'] . $controllerName;
+
         } else {
+
             $controllerClassName = $this->getControllerNameSpace() . $controllerName;
         }
 
@@ -130,7 +139,7 @@ abstract class App implements Engine
     protected function checkActionAvailableToRun(): void
     {
         // Using this function will use any registered auto loaders if the class has not already been known
-        // It uses psr-4...
+        // It uses psr-4..
         if (!method_exists($this->controllerClassName, $this->actionName)) {
             throw new BadMethodCallException('Action is not available to run', 404);
         }
@@ -168,15 +177,26 @@ abstract class App implements Engine
         $this->controllerClassName = $name;
     }
 
+    protected function setApiName(string $name = null): void
+    {
+        $this->apiName = $name;
+    }
+
     protected function setModuleName(string $name = null): void
     {
         $this->moduleName = $name;
     }
 
-    public function getModule(): object
+    public function getModule(): ?object
     {
         $modules = $this->getParam('modules');
-        return $modules[$this->moduleName];
+        return $modules[$this->moduleName] ?? null;
+    }
+
+    public function getApi(): ?object
+    {
+        $api = $this->getParam('api');
+        return $api[$this->apiName] ?? null;
     }
 
     protected function setControllerName(string $name): void
@@ -187,6 +207,11 @@ abstract class App implements Engine
     public function getRequestModuleName(): ?string
     {
         return $this->requestParams[$this->getModuleKey()] ?? null;
+    }
+
+    public function getRequestApiName(): ?string
+    {
+        return $this->requestParams[$this->getApiKey()] ?? null;
     }
 
     public function getRequestControllerName(): string

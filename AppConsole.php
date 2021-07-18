@@ -15,7 +15,7 @@ class AppConsole extends App
         return $this->getParam('consoleControllerNameSpace');
     }
 
-    protected function setRequestParams(): void
+    protected function defineRequestParams(): void
     {
         $params = [];
         foreach ($_SERVER['argv'] as $value) {
