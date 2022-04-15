@@ -32,7 +32,7 @@ class View
         }
 
         ob_start();
-        ob_implicit_flush(0); // PHP 8 requires bool?
+        ob_implicit_flush(false);
         extract($data);
         require $viewFilePath;
 
@@ -51,7 +51,7 @@ class View
         $viewFilePath = $this->absoluteTemplateDirName . $this->templateFileName . $this->viewFileExtension;
 
         ob_start();
-        ob_implicit_flush(0); // PHP 8 requires bool?
+        ob_implicit_flush(false);
         extract($data, EXTR_OVERWRITE);
         require $viewFilePath;
 
