@@ -75,6 +75,8 @@ class PdoRecord implements TableRecord
         foreach ($data as $key => $value) {
             if (in_array($key, $this->getAttributes())) {
                 // it should remain NULL if class attribute value by default null
+                // It means that attributes in not initialed and input is empty
+                // TODO via isset($data[$key])?
                 if (empty($data[$key]) && is_null($this->{$key})) {
                     continue;
                 }
