@@ -8,18 +8,16 @@ use Throwable;
 use BadMethodCallException;
 
 /**
- * Class App
  * App must define request params, route, choose controller and action to run, pass self as DI...
  * App must not know about db, view...
  *
- * @package myth21\viewcontroller
  * @property Throwable[] $throwableChain
  */
 abstract class App implements Engine
 {
     use UrlQueryManager;
 
-    private array $params = [];
+    private array $params;
     private ?Router $router;
     private ?string $moduleName;
     private ?string $apiName;

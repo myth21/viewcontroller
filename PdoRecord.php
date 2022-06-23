@@ -171,9 +171,10 @@ class PdoRecord implements TableRecord
         $where = isset($params['where']) ? ' WHERE ' . $params['where'] : '';
         $order = isset($params['order']) ? ' ORDER BY ' . $params['order'] : '';
         $group = isset($params['group']) ? ' GROUP BY ' . $params['group'] : '';
+        $limit = isset($params['limit']) ? ' LIMIT ' . $params['limit'] : '';
         // TODO other operators...
 
-        $sql = 'SELECT * FROM `' . static::tableName() . '`' . $where . $group . $order;
+        $sql = 'SELECT * FROM `' . static::tableName() . '`' . $where . $group . $order . $limit;
         $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement->setFetchMode(PDO::FETCH_CLASS, static::class);
         $pdoStatement->execute();
