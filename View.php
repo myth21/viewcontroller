@@ -64,6 +64,11 @@ class View
         $this->viewModel = $viewModel;
     }
 
+    public function getViewModel(): ViewModelInterface
+    {
+        return $this->viewModel;
+    }
+
     public function setViewFileExtension(string $extention): void
     {
         $this->viewFileExtension = $extention;
