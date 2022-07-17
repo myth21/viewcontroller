@@ -23,6 +23,7 @@ class View
     protected string $content = '';
 
     protected ?Router $router;
+    protected ?ViewModelInterface $viewModel;
 
     public function renderPart(string $name, array $data = []): string
     {
@@ -56,6 +57,11 @@ class View
         require $viewFilePath;
 
         return ob_get_clean();
+    }
+
+    public function setViewModel(ViewModelInterface $viewModel): void
+    {
+        $this->viewModel = $viewModel;
     }
 
     public function setViewFileExtension(string $extention): void
