@@ -7,6 +7,8 @@ namespace myth21\viewcontroller;
 use Throwable;
 use BadMethodCallException;
 
+use function method_exists;
+
 /**
  * App must define request params, route, choose controller and action to run, pass self as DI...
  * App must not know about db, view...

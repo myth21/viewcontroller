@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
-use RuntimeException;
-
 /**
  * Class AppWeb
  * @package myth21\viewcontroller
@@ -45,10 +43,6 @@ class AppWeb extends App
 
     public function getSession(): Session
     {
-//        if (is_null($this->session)) {
-//            throw new RuntimeException(Session::class . ' is not set');
-//        }
-
         return $this->session;
     }
 
