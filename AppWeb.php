@@ -23,7 +23,7 @@ class AppWeb extends App
 
     protected ?string $requestMethod = null;
     protected ?string $requestUri = null;
-    protected ?string $requestUrPath = null;
+    protected ?string $requestUriPath = null;
     protected bool $isAjaxRequest = false;
     protected Session $session;
     protected ?ResponseHeader $responseHeader = null;
@@ -40,7 +40,7 @@ class AppWeb extends App
         $this->requestParams = $_REQUEST;
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->requestUri = $_SERVER['REQUEST_URI'];
-        $this->requestUrPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $this->requestUriPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $this->isAjaxRequest = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
     }
 
@@ -57,6 +57,16 @@ class AppWeb extends App
     public function getRequestMethod(): string
     {
         return $this->requestMethod;
+    }
+
+    public function getRequestUri(): string
+    {
+        return $this->requestUri;
+    }
+
+    public function getRequestUriPath(): string
+    {
+        return $this->requestUriPath;
     }
 
     public function isPutRequest(): bool
