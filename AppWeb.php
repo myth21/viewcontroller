@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
+use function parse_url;
+
+use const PHP_URL_PATH;
+
 /**
  * Class AppWeb
  * @package myth21\viewcontroller
@@ -18,6 +22,8 @@ class AppWeb extends App
     // other methods...
 
     protected ?string $requestMethod = null;
+    protected ?string $requestUri = null;
+    protected ?string $requestUrPath = null;
     protected bool $isAjaxRequest = false;
     protected Session $session;
     protected ?ResponseHeader $responseHeader = null;
@@ -33,6 +39,8 @@ class AppWeb extends App
     {
         $this->requestParams = $_REQUEST;
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
+        $this->requestUri = $_SERVER['REQUEST_URI'];
+        $this->requestUrPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $this->isAjaxRequest = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
     }
 
