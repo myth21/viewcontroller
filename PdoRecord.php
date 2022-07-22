@@ -190,9 +190,9 @@ class PdoRecord implements TableRecord
     /**
      * @param array $params
      * @throws ReflectionException
-     * @return PdoRecord|null
+     * @return static|null
      */
-    public static function getOne(array $params = []): ?PdoRecord
+    public static function getOne(array $params = []): ?static
     {
         $list = self::getList($params);
         if (!$list) {
@@ -207,7 +207,7 @@ class PdoRecord implements TableRecord
      * @throws PDOException
      * @return bool|PDOStatement
      */
-    public static function getPdoStatement(string $sql)
+    public static function getPdoStatement(string $sql): bool|PDOStatement
     {
         return self::$pdo->prepare($sql);
     }
