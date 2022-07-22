@@ -111,7 +111,7 @@ class PdoRecord implements TableRecord
         return array_keys(static::availableAttributes());
     }
 
-    public static function getNew(): self
+    public static function getNew(): static
     {
         $className = get_called_class();
         return new $className();
