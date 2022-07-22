@@ -143,9 +143,9 @@ class PdoRecord implements TableRecord
     /**
      * @param string|int|float|null $primaryKey
      * @throws ReflectionException
-     * @return self|null
+     * @return static|null
      */
-    public static function getPrimary($primaryKey)
+    public static function getPrimary($primaryKey): static|null
     {
         if (is_null($primaryKey)) {
             return null;
