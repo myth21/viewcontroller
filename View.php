@@ -22,7 +22,6 @@ class View
     protected array $templateParams = [];
     protected array $metaTags = [];
     protected bool $isMinifyHtmlSpace = false;
-    protected string $viewFileExtension = '.php';
     protected string $content = '';
 
     protected ?Router $router;
@@ -30,7 +29,7 @@ class View
 
     public function renderPart(string $name, array $data = []): string
     {
-        $viewFilePath = $this->absoluteTemplateDirName . $name . $this->viewFileExtension;
+        $viewFilePath = $this->absoluteTemplateDirName . $name . '.php';
         if (!is_readable($viewFilePath)) {
             throw new RuntimeException('View file "' . $viewFilePath. '" not found');
         }
@@ -52,7 +51,7 @@ class View
         }
 
         // warning: variables will be replace in template from template part
-        $viewFilePath = $this->absoluteTemplateDirName . $this->templateFileName . $this->viewFileExtension;
+        $viewFilePath = $this->absoluteTemplateDirName . $this->templateFileName . '.php';
 
         ob_start();
         ob_implicit_flush(false);
@@ -70,11 +69,6 @@ class View
     public function getPresenter(): PresenterInterface
     {
         return $this->presenter;
-    }
-
-    public function setViewFileExtension(string $extention): void
-    {
-        $this->viewFileExtension = $extention;
     }
 
     public function setRouter(Router $router): void
