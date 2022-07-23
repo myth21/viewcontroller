@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace myth21\viewcontroller;
 
 use RuntimeException;
+
+use const EXTR_OVERWRITE;
+
 /**
  * Class View
  * @package myth21\viewcontroller
@@ -23,7 +26,7 @@ class View
     protected string $content = '';
 
     protected ?Router $router;
-    protected ?ViewModelInterface $viewModel;
+    protected ?PresenterInterface $presenter;
 
     public function renderPart(string $name, array $data = []): string
     {
@@ -34,7 +37,7 @@ class View
 
         ob_start();
         ob_implicit_flush(false);
-        extract($data);
+        extract($data, EXTR_OVERWRITE);
         require $viewFilePath;
 
         return ob_get_clean();
@@ -59,14 +62,14 @@ class View
         return ob_get_clean();
     }
 
-    public function setViewModel(ViewModelInterface $viewModel): void
+    public function setPresenter(PresenterInterface $viewModel): void
     {
-        $this->viewModel = $viewModel;
+        $this->presenter = $viewModel;
     }
 
-    public function getViewModel(): ViewModelInterface
+    public function getPresenter(): PresenterInterface
     {
-        return $this->viewModel;
+        return $this->presenter;
     }
 
     public function setViewFileExtension(string $extention): void
