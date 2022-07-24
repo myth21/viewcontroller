@@ -25,7 +25,7 @@ abstract class App implements Engine
     private ?string $apiName;
     private ?string $controllerName;
     private ?string $controllerClassName;
-    private array $throwableChain = [];
+    private array $throwableChain;
 
     protected array $requestParams = [];
     protected object $controller;
@@ -268,18 +268,18 @@ abstract class App implements Engine
         $this->throwableChain[] = $e;
     }
 
-    public function getFirstThrowable(): ?Throwable
+    public function getFirstThrowable(): Throwable
     {
         $key = array_key_first($this->throwableChain);
 
-        return $this->throwableChain[$key] ?? null;
+        return $this->throwableChain[$key];
     }
 
-    public function getLastThrowable(): ?Throwable
+    public function getLastThrowable(): Throwable
     {
         $key = array_key_last($this->throwableChain);
 
-        return $this->throwableChain[$key] ?? null;
+        return $this->throwableChain[$key];
     }
 
     public function getThrowableChain(): array
