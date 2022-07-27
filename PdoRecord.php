@@ -57,7 +57,7 @@ class PdoRecord implements TableRecord
         return self::$dsn;
     }
 
-    public static function primaryKeyName(): string
+    public static function getPrimaryKeyName(): string
     {
         return static::$primaryKeyName;
     }
