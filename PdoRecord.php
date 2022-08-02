@@ -163,7 +163,7 @@ class PdoRecord implements TableRecord
 
     /**
      * @param array $params
-     * @return PdoRecord[]
+     * @return static[]
      * @throws ReflectionException
      */
     public static function getList(array $params = []): array
