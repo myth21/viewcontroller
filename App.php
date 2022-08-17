@@ -107,7 +107,7 @@ abstract class App implements Engine
         }
 
         if (!is_array($match) && !is_callable($match['target'])) {
-            throw new BadMethodCallException('Route not found', 404);
+            throw new BadMethodCallException('Route "' . $match . '" not found', 404);
         }
 
         return call_user_func_array($match['target'], $match['params']);
@@ -141,7 +141,8 @@ abstract class App implements Engine
         // Using this function will use any registered auto loaders if the class has not already been known
         // It uses psr-4..
         if (!method_exists($this->controllerClassName, $this->actionName)) {
-            throw new BadMethodCallException('Action is not available to run', 404);
+            $message = 'Action ' . $this->controllerClassName . '::' . $this->actionName . ' is not available to run';
+            throw new BadMethodCallException($message, 404);
         }
     }
 
