@@ -70,6 +70,7 @@ class PdoRecord implements TableRecord
         return $this->id;
     }
 
+    // TODO remove this method. This class must not do it.
     public function init(array $data = []): void
     {
         foreach ($data as $key => $value) {
