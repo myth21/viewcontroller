@@ -90,14 +90,14 @@ class PdoRecord implements TableRecord
 
     protected function beforeUpdate()
     {
-        // Enable foreign key default.
-        static::$pdo->prepare('PRAGMA foreign_keys = ON;')->execute();
+        // Disabled foreign key default.
+        static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
     }
 
     protected function beforeDelete()
     {
-        // Enable foreign key default.
-        static::$pdo->prepare('PRAGMA foreign_keys = ON;')->execute();
+        // Disabled foreign key default.
+        static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
     }
 
     /**
