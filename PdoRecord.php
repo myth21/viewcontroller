@@ -87,8 +87,18 @@ class PdoRecord implements TableRecord
     }
 
     protected function beforeInsert(){}
-    protected function beforeUpdate(){}
-    protected function beforeDelete(){}
+
+    protected function beforeUpdate()
+    {
+        // Enable foreign key default.
+        static::$pdo->prepare('PRAGMA foreign_keys = ON;')->execute();
+    }
+
+    protected function beforeDelete()
+    {
+        // Enable foreign key default.
+        static::$pdo->prepare('PRAGMA foreign_keys = ON;')->execute();
+    }
 
     /**
      * Return child available attributes
