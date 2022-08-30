@@ -13,9 +13,6 @@ use PDO;
 
 /**
  * Class PdoRecord is PDO wrapper
- *
- * @property string $dsn
- * @property PDO $pdo
  */
 class PdoRecord implements TableRecord
 {
