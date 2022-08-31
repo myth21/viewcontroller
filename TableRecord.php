@@ -15,7 +15,7 @@ interface TableRecord
      *
      * @return string
      */
-    public static function tableName();
+    public static function getTableName();
 
     /**
      * Return array of available for init attributes.
@@ -23,7 +23,7 @@ interface TableRecord
      *
      * @return array
      */
-    public static function availableAttributes();
+    public static function getAvailableAttributes();
 
     /**
      * Return primary key of model to find unambiguous table row.
