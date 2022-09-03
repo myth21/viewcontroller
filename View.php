@@ -8,20 +8,15 @@ use RuntimeException;
 
 use const EXTR_OVERWRITE;
 
-/**
- * Class View
- * @package myth21\viewcontroller
- */
 class View
 {
     use UrlQueryManager;
 
     protected ?string $absoluteTemplateDirName = null;
     protected string $templateFileName = '';
-    protected string $title = '';
+    protected string $title = ''; // TODO deleting, it's not his responsibility
     protected array $templateParams = [];
-    protected array $metaTags = [];
-    protected bool $isMinifyHtmlSpace = false;
+    protected array $metaTags = []; // TODO deleting, it's not his responsibility
     protected string $content = '';
 
     protected ?Router $router;
@@ -46,11 +41,7 @@ class View
     {
         $this->content = $this->renderPart($name, $data);
 
-        if ($this->isMinifyHtmlSpace) {
-            $this->content = $this->minifyHtmlSpace();
-        }
-
-        // warning: variables will be replace in template from template part
+        // Warning: variables will be replace in template from template part
         $viewFilePath = $this->absoluteTemplateDirName . $this->templateFileName . '.php';
 
         ob_start();
@@ -79,16 +70,6 @@ class View
     public function createRoute(string $routeName, array $params = []): string
     {
         return $this->router->generate($routeName, $params);
-    }
-
-    public function setIsMinifyHtmlSpace(bool $value): void
-    {
-        $this->isMinifyHtmlSpace = $value;
-    }
-
-    public function minifyHtmlSpace(): string
-    {
-        return preg_replace('/\s+/', ' ', $this->content);
     }
 
     public function setTemplateParams(array $params): void

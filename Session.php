@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
-use http\Exception\RuntimeException;
+use RuntimeException;
 
-/**
- * Class Session
- * @package myth21\viewcontroller
- */
 class Session
 {
     private array $data = [];
@@ -17,7 +13,7 @@ class Session
     public function __construct()
     {
         if (headers_sent()) {
-            throw new \RuntimeException('Headers have already been sent');
+            throw new RuntimeException('Headers have already been sent');
         }
 
         session_start();
@@ -29,7 +25,7 @@ class Session
      * @param string $key
      * @param mixed $value
      */
-    public function set(string $key, $value): void
+    public function set(string $key, mixed $value): void
     {
         $this->data[$key] = $value;
     }
@@ -44,7 +40,7 @@ class Session
      * @param bool $delete
      * @return mixed
      */
-    public function get(string $key, bool $delete = false)
+    public function get(string $key, bool $delete = false): mixed
     {
         $value = $this->data[$key];
         if ($delete) {

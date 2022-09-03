@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
-/**
- * Class WebController
- * @package myth21\viewcontroller
- */
 abstract class WebController extends Controller
 {
     protected AppWeb $app;
