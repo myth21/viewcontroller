@@ -10,48 +10,101 @@ use BadMethodCallException;
 use function method_exists;
 
 /**
- * App must define request params, route, choose controller and action to run, pass self as DI...
+ * App must define request params, route, choose controller and action to run, pass self in app as dependency injection.
  * App must not know about db, view...
  *
  * @property Throwable[] $throwableChain
+ * @property array $params Config params.
  */
 abstract class App implements Engine
 {
     use UrlQueryManager;
 
-    private array $params;
-    private ?Router $router;
+    /**
+     * Config params.
+     */
+//    private array $params;
+
+    /**
+     * RouterInterface responsible for routing.
+     */
+    private ?RouterInterface $router;
+
+    /**
+     * Module entity (model) name is specified in config params.
+     */
     private ?string $moduleName;
+
+    /**
+     * API entity (model) name is specified in config params.
+     */
     private ?string $apiName;
+
+    /**
+     * Controller name without Controller word.
+     */
     private ?string $controllerName;
+
+    /**
+     * Full controller class name for handling.
+     */
     private ?string $controllerClassName;
+
+    /**
+     * Stack of throwable objects.
+     */
     private array $throwableChain;
 
+    /**
+     * Request params from GET, POST and others.
+     */
     protected array $requestParams = [];
+
+    /**
+     * Controller to handle request.
+     */
     protected object $controller;
+
+    /**
+     * Action of controller to handle request.
+     */
     protected string $actionName;
 
+    /**
+     * Init request params for App.
+     */
     abstract protected function defineRequestParams(): void;
 
+    /**
+     * Return controller namespace according to PSR-4.
+     */
     abstract protected function getControllerNameSpace(): string;
 
     /**
      * @param mixed $out
      * @return mixed
+     * // TODO check for moving output in index.
      */
     abstract protected function out($out);
 
-    public function __construct(array $params)
+    public function __construct(private array $params)
     {
-        $this->params = $params;
+        //$this->params = $params;
     }
 
-    public static function factory(array $params): self
+    /**
+     * Create concrete app object.
+     */
+    public static function factory(array $params): static
     {
         $className = (PHP_SAPI === 'cli') ? AppConsole::class : AppWeb::class;
         return new $className($params);
     }
 
+    /**
+     * Execute request processing of the concrete app object.
+     * TODO return
+     */
     public function run()
     {
         $this->defineRequestParams();
@@ -91,6 +144,8 @@ abstract class App implements Engine
     }
 
     /**
+     * Define routeing map for router.
+     *
      * @throws Throwable
      */
     protected function createRoute(): array
@@ -113,6 +168,9 @@ abstract class App implements Engine
         return call_user_func_array($match['target'], $match['params']);
     }
 
+    /* TODO what type of phpdoc comments?
+     * Define controller class name for running.
+     */
     protected function defineControllerClassName(bool $doSearchInApp = false): void
     {
         $controllerName = $this->getControllerName() . ucfirst($this->getControllerKey());
@@ -134,6 +192,8 @@ abstract class App implements Engine
     }
 
     /**
+     * Check available action for running in controller.
+     *
      * @throws BadMethodCallException
      */
     protected function checkActionAvailableToRun(): void
@@ -146,6 +206,9 @@ abstract class App implements Engine
         }
     }
 
+    /**
+     * Create controller object to handle request.
+     */
     protected function createController(): object
     {
         $controller = new $this->controllerClassName($this);
@@ -154,121 +217,180 @@ abstract class App implements Engine
         return $this->controller;
     }
 
-    public function getRouter(): Router
+    /**
+     * Return router.
+     */
+    public function getRouter(): RouterInterface
     {
         return $this->router;
     }
 
+    /**
+     * Return is clean url applied.
+     */
     public function isCleanUrlApply(): bool
     {
         return $this->params['isCleanUrlApply'];
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
+     * Set request param.
      */
     protected function setRequestParam(string $key, $value): void
     {
         $this->requestParams[$key] = $value;
     }
 
+    /**
+     * Set controller class name to create object for processing request.
+     */
     protected function setControllerClassName(string $name): void
     {
         $this->controllerClassName = $name;
     }
 
+    /**
+     * Set entity (model) name of an API.
+     */
     protected function setApiName(string $name = null): void
     {
         $this->apiName = $name;
     }
 
+    /**
+     * Set entity (model) name of a module.
+     */
     protected function setModuleName(string $name = null): void
     {
         $this->moduleName = $name;
     }
 
+    /**
+     * Return module.
+     */
     public function getModule(): ?object
     {
         $modules = $this->getParam('modules');
         return $modules[$this->moduleName] ?? null;
     }
 
+    /**
+     * Return API.
+     */
     public function getApi(): ?object
     {
         $api = $this->getParam('api');
         return $api[$this->apiName] ?? null;
     }
 
+    /**
+     * Set controller name to create object for processing request.
+     */
     protected function setControllerName(string $name): void
     {
         $this->controllerName = $name;
     }
 
+    /**
+     * Return module name.
+     */
     public function getRequestModuleName(): ?string
     {
         return $this->requestParams[$this->getModuleKey()] ?? null;
     }
 
+    /**
+     * Return API entity (model) name.
+     */
     public function getRequestApiName(): ?string
     {
         return $this->requestParams[$this->getApiKey()] ?? null;
     }
 
+    /**
+     * Return request controller name.
+     */
     public function getRequestControllerName(): string
     {
         return $this->requestParams[$this->getControllerKey()] ?? $this->getParam('defaultControllerName');
     }
 
+    /**
+     * Return request action name from request params.
+     */
     public function getRequestActionName(): string
     {
         return $this->requestParams[$this->getActionKey()] ?? $this->getParam('defaultActionName');
     }
 
+    /**
+     * Return controller name.
+     */
     protected function getControllerName(): string
     {
         return $this->controllerName;
     }
 
+    /**
+     * Set action name of a controller.
+     */
     protected function setActionName(string $name): void
     {
         $this->actionName = $name;
     }
 
+    /**
+     * Return action name.
+     */
     protected function getActionName(): string
     {
         return $this->actionName;
     }
 
     /**
-     * @param string $name
-     * @return mixed|bool|null
+     * Return config param by key.
+     * @return mixed
      */
-    public function getParam(string $name)
+    public function getParam(string $name): mixed
     {
         return $this->params[$name] ?? null;
     }
 
+    /**
+     * Return config params.
+     */
     public function getParams(): array
     {
         return $this->params;
     }
 
+    /**
+     * Return request params.
+     */
     public function getRequestParams(): array
     {
         return $this->requestParams;
     }
 
+    /**
+     * Return request param by key.
+     */
     public function getRequestParam(string $name): ?string
     {
         return $this->requestParams[$name] ?? null;
     }
 
+    /**
+     * Add throwable object in chain.
+     */
     protected function addThrowable(Throwable $e): void
     {
         $this->throwableChain[] = $e;
     }
 
+    /**
+     * Return first throwable object from chain.
+     */
     public function getFirstThrowable(): Throwable
     {
         $key = array_key_first($this->throwableChain);
@@ -276,6 +398,9 @@ abstract class App implements Engine
         return $this->throwableChain[$key];
     }
 
+    /**
+     * Return last throwable object from chain.
+     */
     public function getLastThrowable(): Throwable
     {
         $key = array_key_last($this->throwableChain);
@@ -283,6 +408,9 @@ abstract class App implements Engine
         return $this->throwableChain[$key];
     }
 
+    /**
+     * Return throwable objects from chain.
+     */
     public function getThrowableChain(): array
     {
         return $this->throwableChain;

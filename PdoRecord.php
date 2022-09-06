@@ -316,6 +316,8 @@ class PdoRecord implements TableRecord
         $execute = $pdoStatement->execute($this->getInsertingAvailableValues());
 
         if (static::$isSequenceObjectId) {
+            // https://www.php.net/manual/ru/pdo.lastinsertid.php
+            // It means that primary key of child class can be string or false only in SQLite database.
             $this->{static::$primaryKeyName} = self::$pdo->lastInsertId();
         }
 

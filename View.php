@@ -24,7 +24,7 @@ class View
     protected bool $isMinifyHtmlSpace = false;
     protected string $content = '';
 
-    protected ?Router $router;
+    protected ?RouterInterface $router;
     protected ?PresenterInterface $presenter;
 
     public function renderPart(string $name, array $data = []): string
@@ -71,7 +71,7 @@ class View
         return $this->presenter;
     }
 
-    public function setRouter(Router $router): void
+    public function setRouter(RouterInterface $router): void
     {
         $this->router = $router;
     }
