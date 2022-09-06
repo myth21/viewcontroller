@@ -13,9 +13,6 @@ use PDO;
 
 /**
  * Class PdoRecord is PDO wrapper
- *
- * @property string $dsn
- * @property PDO $pdo
  */
 class PdoRecord implements TableRecord
 {
@@ -70,6 +67,7 @@ class PdoRecord implements TableRecord
         return $this->id;
     }
 
+    // TODO remove this method. This class must not do it.
     public function init(array $data = []): void
     {
         foreach ($data as $key => $value) {
@@ -86,20 +84,30 @@ class PdoRecord implements TableRecord
     }
 
     protected function beforeInsert(){}
-    protected function beforeUpdate(){}
-    protected function beforeDelete(){}
+
+    protected function beforeUpdate()
+    {
+        // Disabled foreign key default.
+        static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
+    }
+
+    protected function beforeDelete()
+    {
+        // Disabled foreign key default.
+        static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
+    }
 
     /**
      * Return child available attributes
      */
-    public static function availableAttributes(): array
+    public static function getAvailableAttributes(): array
     {
         return [];
     }
 
     public static function getLabel(string $attr): string
     {
-        $availableAttributes = static::availableAttributes();
+        $availableAttributes = static::getAvailableAttributes();
         return $availableAttributes[$attr] ?? $attr;
     }
 
@@ -108,7 +116,7 @@ class PdoRecord implements TableRecord
      */
     protected function getAttributes(): array
     {
-        return array_keys(static::availableAttributes());
+        return array_keys(static::getAvailableAttributes());
     }
 
     public static function getNew(): static
@@ -121,7 +129,7 @@ class PdoRecord implements TableRecord
      * Trying to determine the table name through child class name (syntactic sugar)
      * @throws ReflectionException
      */
-    public static function tableName(): string
+    public static function getTableName(): string
     {
         $className = get_called_class();
         $reflectionClass = new ReflectionClass($className);
@@ -151,7 +159,7 @@ class PdoRecord implements TableRecord
             return null;
         }
 
-        $sql = 'SELECT * FROM `'. static::tableName().'` WHERE `'.static::$primaryKeyName.'`="'.$primaryKey.'"';
+        $sql = 'SELECT * FROM `'. static::getTableName().'` WHERE `'.static::$primaryKeyName.'`="'.$primaryKey.'"';
         $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement->setFetchMode(PDO::FETCH_CLASS, static::class);
         $pdoStatement->execute();
@@ -174,7 +182,7 @@ class PdoRecord implements TableRecord
         $limit = isset($params['limit']) ? ' LIMIT ' . $params['limit'] : '';
         // TODO other operators...
 
-        $sql = 'SELECT * FROM `' . static::tableName() . '`' . $where . $group . $order . $limit;
+        $sql = 'SELECT * FROM `' . static::getTableName() . '`' . $where . $group . $order . $limit;
         $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement->setFetchMode(PDO::FETCH_CLASS, static::class);
         $pdoStatement->execute();
@@ -258,7 +266,7 @@ class PdoRecord implements TableRecord
     public static function getCount(array $params = []): int
     {
         $where = isset($params['where']) ? 'WHERE ' . $params['where'] : '';
-        $sql = 'SELECT COUNT(*) FROM `' . static::tableName() . '` ' . $where . ';';
+        $sql = 'SELECT COUNT(*) FROM `' . static::getTableName() . '` ' . $where . ';';
         return (int)self::$pdo->query($sql)->fetchColumn();
     }
 
@@ -270,7 +278,7 @@ class PdoRecord implements TableRecord
     {
         $this->beforeDelete();
 
-        $sql = 'DELETE FROM `'.static::tableName().'` WHERE `'.static::$primaryKeyName.'`=:'.static::$primaryKeyName;
+        $sql = 'DELETE FROM `'.static::getTableName().'` WHERE `'.static::$primaryKeyName.'`=:'.static::$primaryKeyName;
         $pdoStatement = self::$pdo->prepare($sql);
 
         // Only variables should be passed by reference
@@ -293,7 +301,7 @@ class PdoRecord implements TableRecord
 
         $idsString = self::getDeletingIdsString($ids);
 
-        $sql = 'DELETE FROM `' . static::tableName() . '` WHERE `' . static::$primaryKeyName . '` in (' . $idsString . ');';
+        $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '` in (' . $idsString . ');';
         $pdoStatement = self::$pdo->prepare($sql);
 
         return $pdoStatement->execute();
@@ -311,7 +319,7 @@ class PdoRecord implements TableRecord
             throw new RuntimeException('Inserting available attributes of '.static::class.' are not found');
         }
 
-        $sql = 'INSERT INTO `'.static::tableName().'` ('.$this->getInsertingAvailableAttributes().') VALUES ('.$this->getInsertingAvailableAttributes(true).');';
+        $sql = 'INSERT INTO `'.static::getTableName().'` ('.$this->getInsertingAvailableAttributes().') VALUES ('.$this->getInsertingAvailableAttributes(true).');';
         $pdoStatement = self::$pdo->prepare($sql);
         $execute = $pdoStatement->execute($this->getInsertingAvailableValues());
 
@@ -332,7 +340,7 @@ class PdoRecord implements TableRecord
     {
         $this->beforeUpdate();
 
-        $sql = 'UPDATE `'.static::tableName().'` SET '.$this->getUpdatingAvailableValues().' WHERE `'.static::$primaryKeyName.'`="'.$this->getPrimaryKey().'"';
+        $sql = 'UPDATE `'.static::getTableName().'` SET '.$this->getUpdatingAvailableValues().' WHERE `'.static::$primaryKeyName.'`="'.$this->getPrimaryKey().'"';
         $pdoStatement = self::$pdo->prepare($sql);
 
         if ($pdoStatement instanceof PDOStatement) {
