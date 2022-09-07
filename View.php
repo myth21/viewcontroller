@@ -14,8 +14,14 @@ class View
 
     protected ?string $absoluteTemplateDirName = null;
     protected string $templateFileName = '';
-    protected string $title = ''; // TODO deleting, it's not his responsibility
+    /**
+     * View title.
+     */
+    protected string $title = '';
     protected array $templateParams = [];
+    /**
+     * @deprecated
+     */
     protected array $metaTags = []; // TODO deleting, it's not his responsibility
     protected string $content = '';
 
