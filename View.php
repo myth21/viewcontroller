@@ -14,8 +14,14 @@ class View
 
     protected ?string $absoluteTemplateDirName = null;
     protected string $templateFileName = '';
-    protected string $title = ''; // TODO deleting, it's not his responsibility
+    /**
+     * View title.
+     */
+    protected string $title = '';
     protected array $templateParams = [];
+    /**
+     * @deprecated
+     */
     protected array $metaTags = []; // TODO deleting, it's not his responsibility
     protected string $content = '';
 
@@ -119,11 +125,17 @@ class View
         $this->templateFileName = $name;
     }
 
+    /**
+     * @deprecated
+     */
     public function addMetaTag(string $name, string $content): void
     {
         $this->metaTags[$name] = $content;
     }
 
+    /**
+     * @deprecated
+     */
     public function getMetaTags(): array
     {
         return $this->metaTags;
