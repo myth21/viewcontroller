@@ -125,11 +125,17 @@ class View
         $this->templateFileName = $name;
     }
 
+    /**
+     * @deprecated
+     */
     public function addMetaTag(string $name, string $content): void
     {
         $this->metaTags[$name] = $content;
     }
 
+    /**
+     * @deprecated
+     */
     public function getMetaTags(): array
     {
         return $this->metaTags;
