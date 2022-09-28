@@ -25,7 +25,7 @@ class View
     protected array $metaTags = []; // TODO deleting, it's not his responsibility
     protected string $content = '';
 
-    protected ?Router $router;
+    protected ?RouterInterface $router;
     protected ?PresenterInterface $presenter;
 
     public function renderPart(string $name, array $data = []): string
@@ -68,7 +68,7 @@ class View
         return $this->presenter;
     }
 
-    public function setRouter(Router $router): void
+    public function setRouter(RouterInterface $router): void
     {
         $this->router = $router;
     }
@@ -123,22 +123,6 @@ class View
     public function setTemplateFileName(string $name): void
     {
         $this->templateFileName = $name;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function addMetaTag(string $name, string $content): void
-    {
-        $this->metaTags[$name] = $content;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getMetaTags(): array
-    {
-        return $this->metaTags;
     }
 
     public function setTitle(string $value): void

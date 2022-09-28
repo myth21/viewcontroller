@@ -8,7 +8,7 @@ namespace myth21\viewcontroller;
  * Class Router
  * @package myth21\viewcontroller
  */
-interface Router
+interface RouterInterface
 {
     public function generate(string $routeName, array $params = []): string;
 
