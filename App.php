@@ -330,7 +330,7 @@ abstract class App implements Engine
      */
     public function getRequestActionName(): string
     {
-        return $this->requestGetParams[$this->getActionKey()] ?? $this->getParam('defaultActionName');
+        return $this->requestParams[$this->getActionKey()] ?? $this->getParam('defaultActionName');
     }
 
     /**
