@@ -114,22 +114,15 @@ abstract class App implements Engine
         try {
             if ($this->isCleanUrlApply() && $route = $this->createRoute()) {
                 foreach ($route as $param => $value) {
-                    $this->setRequestParam($param, $value);
+                    // $this->setRequestParam($param, $value);
+                    $this->setRequestGetParam($param, $value);
                 }
-            }
-
-            if ($this->isCleanUrlApply()) {
-                $this->setControllerName($route['controller']);
-                $this->setActionName($route['action']);
-            } else {
-                $this->setControllerName($this->getRequestControllerName());
-                $this->setActionName($this->getRequestActionName());
             }
 
             $this->setModuleName($this->getRequestModuleName());
             $this->setApiName($this->getRequestApiName());
-//            $this->setControllerName($this->getRequestControllerName());
-//            $this->setActionName($this->getRequestActionName());
+            $this->setControllerName($this->getRequestControllerName());
+            $this->setActionName($this->getRequestActionName());
             $this->defineControllerClassName();
 
             $this->checkActionAvailableToRun();
@@ -252,6 +245,15 @@ abstract class App implements Engine
     }
 
     /**
+     * Set request GET param.
+     */
+    protected function setRequestGetParam(string $key, $value): void
+    {
+        $this->requestGetParams[$key] = $value;
+    }
+
+
+    /**
      * Set controller class name to create object for processing request.
      */
     protected function setControllerClassName(string $name): void
@@ -322,7 +324,7 @@ abstract class App implements Engine
      */
     public function getRequestControllerName(): string
     {
-        return $this->requestParams[$this->getControllerKey()] ?? $this->getParam('defaultControllerName');
+        return $this->requestGetParams[$this->getControllerKey()] ?? $this->getParam('defaultControllerName');
     }
 
     /**
@@ -330,7 +332,7 @@ abstract class App implements Engine
      */
     public function getRequestActionName(): string
     {
-        return $this->requestParams[$this->getActionKey()] ?? $this->getParam('defaultActionName');
+        return $this->requestGetParams[$this->getActionKey()] ?? $this->getParam('defaultActionName');
     }
 
     /**
