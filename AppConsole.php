@@ -28,7 +28,8 @@ class AppConsole extends App
             }
         }
 
-        $this->requestParams = $params;
+        $this->requestParams = $params; // todo check and delete
+        $this->requestGetParams = $params; // rename as requestParams or console params
     }
 
     /**
