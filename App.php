@@ -314,7 +314,7 @@ abstract class App implements Engine
      */
     public function getRequestControllerName(): string
     {
-        return $this->requestGetParams[$this->getControllerKey()] ?? $this->getParam('defaultControllerName');
+        return $this->requestParams[$this->getControllerKey()] ?? $this->getParam('defaultControllerName');
     }
 
     /**
