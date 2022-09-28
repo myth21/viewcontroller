@@ -118,10 +118,18 @@ abstract class App implements Engine
                 }
             }
 
+            if ($this->isCleanUrlApply()) {
+                $this->setControllerName($route['controller']);
+                $this->setActionName($route['action']);
+            } else {
+                $this->setControllerName($this->getRequestControllerName());
+                $this->setActionName($this->getRequestActionName());
+            }
+
             $this->setModuleName($this->getRequestModuleName());
             $this->setApiName($this->getRequestApiName());
-            $this->setControllerName($this->getRequestControllerName());
-            $this->setActionName($this->getRequestActionName());
+//            $this->setControllerName($this->getRequestControllerName());
+//            $this->setActionName($this->getRequestActionName());
             $this->defineControllerClassName();
 
             $this->checkActionAvailableToRun();
