@@ -38,6 +38,8 @@ class AppWeb extends App
     protected function defineRequestParams(): void
     {
         $this->requestParams = $_REQUEST;
+        $this->requestGetParams = $_GET;
+        $this->requestPostParams = $_POST;
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->requestUri = $_SERVER['REQUEST_URI'];
         $this->requestUriPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

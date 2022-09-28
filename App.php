@@ -28,6 +28,8 @@ abstract class App implements Engine
     private array $throwableChain;
 
     protected array $requestParams = [];
+    protected array $requestGetParams = [];
+    protected array $requestPostParams = [];
     protected object $controller;
     protected string $actionName;
 
@@ -217,12 +219,12 @@ abstract class App implements Engine
 
     public function getRequestControllerName(): string
     {
-        return $this->requestParams[$this->getControllerKey()] ?? $this->getParam('defaultControllerName');
+        return $this->requestGetParams[$this->getControllerKey()] ?? $this->getParam('defaultControllerName');
     }
 
     public function getRequestActionName(): string
     {
-        return $this->requestParams[$this->getActionKey()] ?? $this->getParam('defaultActionName');
+        return $this->requestGetParams[$this->getActionKey()] ?? $this->getParam('defaultActionName');
     }
 
     protected function getControllerName(): string
