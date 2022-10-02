@@ -9,6 +9,8 @@ use BadMethodCallException;
 
 use function method_exists;
 
+use const PHP_SAPI;
+
 /**
  * App must define request params, route, choose controller and action to run, pass self in app as dependency injection.
  * App must not know about db, view...
@@ -115,7 +117,12 @@ abstract class App implements Engine
             if ($this->isCleanUrlApply() && $route = $this->createRoute()) {
                 foreach ($route as $param => $value) {
                     // $this->setRequestParam($param, $value);
-                    $this->setRequestGetParam($param, $value);
+                    // todo implement in child class web or console
+                    if (PHP_SAPI === 'cli') {
+                        $this->setRequestParam($param, $value);
+                    } else {
+                        $this->setRequestGetParam($param, $value);
+                    }
                 }
             }
 
