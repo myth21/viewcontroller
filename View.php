@@ -39,7 +39,7 @@ class View
             throw new RuntimeException('View file "' . $viewFilePath. '" not found');
         }
 
-        if ($defaultName) {
+        if (!is_readable($viewFilePath) && $defaultName) {
             $viewFilePath = $this->absoluteTemplateDirName . $defaultName . '.php';
             if (!is_file($viewFilePath)) {
                 throw new RuntimeException('View file default "' . $viewFilePath. '" not found');
