@@ -6,6 +6,8 @@ namespace myth21\viewcontroller;
 
 use RuntimeException;
 
+use function is_null;
+
 use const EXTR_OVERWRITE;
 
 class View
@@ -28,10 +30,15 @@ class View
     protected ?RouterInterface $router;
     protected ?PresenterInterface $presenter;
 
-    public function renderPart(string $name, array $data = []): string
+    public function renderPart(string $name, array $data = [], string $defaultName = null): string
     {
         $viewFilePath = $this->absoluteTemplateDirName . $name . '.php';
-        if (!is_readable($viewFilePath)) {
+        if (!is_file($viewFilePath) && is_null($defaultName)) {
+            throw new RuntimeException('View file "' . $viewFilePath. '" not found');
+        }
+
+        $viewFilePath = $this->absoluteTemplateDirName . $defaultName . '.php';
+        if (!is_file($viewFilePath)) {
             throw new RuntimeException('View file "' . $viewFilePath. '" not found');
         }
 
