@@ -400,6 +400,22 @@ abstract class App implements Engine
     }
 
     /**
+     * Return request param by key.
+     */
+    public function getRequestGetParam(string $name): ?string
+    {
+        return $this->requestGetParams[$name] ?? null;
+    }
+
+    /**
+     * Return request param by key.
+     */
+    public function getRequestPostParam(string $name): ?string
+    {
+        return $this->requestPostParams[$name] ?? null;
+    }
+
+    /**
      * Add throwable object in chain.
      */
     protected function addThrowable(Throwable $e): void
