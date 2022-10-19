@@ -23,11 +23,6 @@ abstract class App implements Engine
     use UrlQueryManager;
 
     /**
-     * Config params.
-     */
-//    private array $params;
-
-    /**
      * RouterInterface responsible for routing.
      */
     private ?RouterInterface $router;
@@ -61,7 +56,15 @@ abstract class App implements Engine
      * Request params from GET, POST and others.
      */
     protected array $requestParams = [];
+
+    /**
+     * Request GET params.
+     */
     protected array $requestGetParams = [];
+
+    /**
+     * Request POST params.
+     */
     protected array $requestPostParams = [];
 
     /**
@@ -70,12 +73,12 @@ abstract class App implements Engine
     protected object $controller;
 
     /**
-     * Action of controller to handle request.
+     * Action of a controller to handle request.
      */
     protected string $actionName;
 
     /**
-     * Init request params for App.
+     * Defining request params for console or web application.
      */
     abstract protected function defineRequestParams(): void;
 
