@@ -58,6 +58,20 @@ class View
         return ob_get_clean();
     }
 
+    public function renderFile(string $name, array $data = []): string
+    {
+        if (!is_readable($name)) {
+            throw new \Exception('View file "' . $name. '" not found');
+        }
+
+        ob_start();
+        ob_implicit_flush(false);
+        extract($data, EXTR_OVERWRITE);
+        require $name;
+
+        return ob_get_clean();
+    }
+
     public function setPresenter(PresenterInterface $viewModel): void
     {
         $this->presenter = $viewModel;
