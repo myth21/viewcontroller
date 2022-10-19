@@ -318,7 +318,7 @@ abstract class App implements Engine
      */
     public function getRequestModuleName(): ?string
     {
-        return $this->requestParams[$this->getModuleKey()] ?? null;
+        return $this->requestGetParams[$this->getModuleKey()] ?? null;
     }
 
     /**
@@ -326,7 +326,7 @@ abstract class App implements Engine
      */
     public function getRequestApiName(): ?string
     {
-        return $this->requestParams[$this->getApiKey()] ?? null;
+        return $this->requestGetParams[$this->getApiKey()] ?? null;
     }
 
     /**
