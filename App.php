@@ -151,9 +151,11 @@ abstract class App implements AppInterface
 //                    } else {
 //                        $this->setRequestGetParam($param, $value);
 //                    }
+
+
+                    // Set param from route like GET param
                     $this->setRequestGetParam($param, $value);
                 }
-                // HERE need to know to api, module or app request
             }
 
             //$this->setModuleName($this->getRequestModuleName());
@@ -161,7 +163,7 @@ abstract class App implements AppInterface
             $this->setControllerName($this->getRequestControllerName());
             $this->setActionName($this->getRequestActionName());
 
-            $this->defineControllerNameSpaceForCleanUrl();
+            $this->defineControllerNameSpace();
             $this->defineControllerClassName();
 
             $this->checkActionAvailableToRun();
@@ -212,6 +214,9 @@ abstract class App implements AppInterface
         return call_user_func_array($match['target'], $match['params']);
     }
 
+    /**
+     * Return route elements.
+     */
     public function getRoute(): array
     {
         return $this->route;
@@ -220,7 +225,7 @@ abstract class App implements AppInterface
     /**
      * Define controller name space.
      */
-    protected function defineControllerNameSpaceForCleanUrl(): void
+    protected function defineControllerNameSpace(): void
     {
         if (array_key_first($this->route) === $this->getApiKey()) {
 
@@ -237,12 +242,11 @@ abstract class App implements AppInterface
     }
 
     /**
-     * Define controller class name for running.
-     * @param bool $doSearchInApp Force search class name in app dir.
+     * Define full class name of a controller for running.
      */
-    protected function defineControllerClassName(bool $doSearchInApp = false): void
+    protected function defineControllerClassName(): void
     {
-        $controllerName = $this->getControllerName() . ucfirst($this->getControllerKey());
+        $controllerName = $this->controllerName . ucfirst($this->getControllerKey());
 
         // define name space
         /*
@@ -312,6 +316,7 @@ abstract class App implements AppInterface
 
     /**
      * Set request param. It can be http or console param.
+     *
      * @param string $key
      * @param string $value
      */
@@ -322,7 +327,9 @@ abstract class App implements AppInterface
 
 
     /**
-     * Set controller class name to create object for processing request.
+     * Set namespace class name of a controller (\app\controller\ControllerClass) to create object for processing request.
+     *
+     * @param string $name
      */
     protected function setControllerClassName(string $name): void
     {
@@ -330,41 +337,7 @@ abstract class App implements AppInterface
     }
 
     /**
-     * Set entity (model) name of an API.
-     */
-    protected function setApiName(string $name = null): void
-    {
-        $this->apiName = $name;
-    }
-
-    /**
-     * Set entity (model) name of a module.
-     */
-    protected function setModuleName(string $name = null): void
-    {
-        $this->moduleName = $name;
-    }
-
-    /**
-     * Return module.
-     */
-    public function getModule(): ?object
-    {
-        $modules = $this->getParam('modules');
-        return $modules[$this->moduleName] ?? null;
-    }
-
-    /**
-     * Return API.
-     */
-    public function getApi(): ?object
-    {
-        $api = $this->getParam('api');
-        return $api[$this->apiName] ?? null;
-    }
-
-    /**
-     * Set controller name to create object for processing request.
+     * Set controller name (e.g. Article) to create object for processing request.
      */
     protected function setControllerName(string $name): void
     {
@@ -372,23 +345,7 @@ abstract class App implements AppInterface
     }
 
     /**
-     * Return module name.
-     */
-    public function getRequestModuleName(): ?string
-    {
-        return $this->requestGetParams[$this->getModuleKey()] ?? null;
-    }
-
-    /**
-     * Return API entity (model) name.
-     */
-    public function getRequestApiName(): ?string
-    {
-        return $this->requestGetParams[$this->getApiKey()] ?? null;
-    }
-
-    /**
-     * Return request controller name.
+     * Return request controller name (e.g. Article).
      */
     public function getRequestControllerName(): string
     {
@@ -396,23 +353,7 @@ abstract class App implements AppInterface
     }
 
     /**
-     * Return request action name from request params.
-     */
-    public function getRequestActionName(): string
-    {
-        return $this->requestGetParams[$this->getActionKey()] ?? $this->getParam('defaultActionName');
-    }
-
-    /**
-     * Return controller name.
-     */
-    protected function getControllerName(): string
-    {
-        return $this->controllerName;
-    }
-
-    /**
-     * Set action name of a controller.
+     * Set action name (e.g. view|list) of a controller.
      */
     protected function setActionName(string $name): void
     {
@@ -420,11 +361,11 @@ abstract class App implements AppInterface
     }
 
     /**
-     * Return action name.
+     * Return request action name (e.g. view|list) from request params.
      */
-    protected function getActionName(): string
+    public function getRequestActionName(): string
     {
-        return $this->actionName;
+        return $this->requestGetParams[$this->getActionKey()] ?? $this->getParam('defaultActionName');
     }
 
     /**
@@ -479,7 +420,7 @@ abstract class App implements AppInterface
     }
 
     /**
-     * Return request param by key.
+     * Return request POST param by key.
      */
     public function getRequestPostParam(string $name): ?string
     {
@@ -487,7 +428,20 @@ abstract class App implements AppInterface
     }
 
     /**
+     * Return request POST params.
+     */
+    public function getRequestPostParams(): array
+    {
+        return $this->requestPostParams;
+    }
+
+
+    // TODO need to manage Throwables?
+
+    /**
      * Add throwable object in chain.
+     *
+     * @param Throwable $e
      */
     protected function addThrowable(Throwable $e): void
     {
@@ -520,6 +474,59 @@ abstract class App implements AppInterface
     public function getThrowableChain(): array
     {
         return $this->throwableChain;
+    }
+
+
+    // TODO need to manage api and module getting names?
+
+    /**
+     * Set entity (model) name of an API.
+     */
+//    protected function setApiName(string $name = null): void
+//    {
+//        $this->apiName = $name;
+//    }
+
+    /**
+     * Set entity (model) name of a module.
+     */
+    protected function setModuleName(string $name = null): void
+    {
+        $this->moduleName = $name;
+    }
+
+    /**
+     * Return module.
+     */
+    public function getModule(): ?object
+    {
+        $modules = $this->getParam('modules');
+        return $modules[$this->moduleName] ?? null;
+    }
+
+    /**
+     * Return API.
+     */
+    public function getApi(): ?object
+    {
+        $api = $this->getParam('api');
+        return $api[$this->apiName] ?? null;
+    }
+
+    /**
+     * Return module name.
+     */
+    public function getRequestModuleName(): ?string
+    {
+        return $this->requestGetParams[$this->getModuleKey()] ?? null;
+    }
+
+    /**
+     * Return API entity (model) name.
+     */
+    public function getRequestApiName(): ?string
+    {
+        return $this->requestGetParams[$this->getApiKey()] ?? null;
     }
 
 }
