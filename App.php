@@ -194,8 +194,9 @@ abstract class App implements AppInterface
         return call_user_func_array($match['target'], $match['params']);
     }
 
-    /* TODO what type of phpdoc comments?
+    /**
      * Define controller class name for running.
+     * @param bool $doSearchInApp Force search class name in app dir.
      */
     protected function defineControllerClassName(bool $doSearchInApp = false): void
     {
