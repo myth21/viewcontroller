@@ -175,9 +175,11 @@ abstract class App implements AppInterface
                 ob_end_clean();
             }
             $this->addThrowable($e);
+
+            // Set handler controller on throwable error
             $this->setControllerName($this->getParam('exceptionControllerName'));
-            $this->defineControllerClassName(true); // todo trying find api classes in exceptions bad idea
             $this->setActionName($this->getParam('exceptionMethodName'));
+            $this->defineControllerClassName(); // todo trying find api classes in exceptions bad idea
 
             $out = $this->runController();
         }
