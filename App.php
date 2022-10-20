@@ -7,9 +7,11 @@ namespace myth21\viewcontroller;
 use Throwable;
 use BadMethodCallException;
 
+use function array_key_first;
 use function method_exists;
 
 use function print_r;
+use function ucfirst;
 use function var_dump;
 
 use const PHP_SAPI;
@@ -33,12 +35,12 @@ abstract class App implements AppInterface
     /**
      * Module entity (model) name is specified in config params.
      */
-    private ?string $moduleName;
+    private ?string $moduleName = null;
 
     /**
      * API entity (model) name is specified in config params.
      */
-    private ?string $apiName;
+    private ?string $apiName = null;
 
     /**
      * Controller name without Controller word.
@@ -70,6 +72,16 @@ abstract class App implements AppInterface
      * Request POST params.
      */
     protected array $requestPostParams = [];
+
+    /**
+     * Route elements. It is used on clean url.
+     */
+    protected array $route = [];
+
+    /**
+     * Namespace to handle request.
+     */
+    protected string $controllerNameSpace;
 
     /**
      * Controller to handle request.
@@ -128,8 +140,9 @@ abstract class App implements AppInterface
         $this->defineRequestParams();
 
         try {
-            if ($this->isCleanUrlApply() && $route = $this->createRoute()) {
-                foreach ($route as $param => $value) {
+            if ($this->isCleanUrlApply() && $this->route = $this->createRoute()) {
+
+                foreach ($this->route as $param => $value) {
                     // $this->setRequestParam($param, $value);
                     // todo implement in child class web or console
 //                    if (PHP_SAPI === 'cli') {
@@ -140,12 +153,15 @@ abstract class App implements AppInterface
 //                    }
                     $this->setRequestGetParam($param, $value);
                 }
+                // HERE need to know to api, module or app request
             }
 
-            $this->setModuleName($this->getRequestModuleName());
-            $this->setApiName($this->getRequestApiName());
+            //$this->setModuleName($this->getRequestModuleName());
+            //$this->setApiName($this->getRequestApiName());
             $this->setControllerName($this->getRequestControllerName());
             $this->setActionName($this->getRequestActionName());
+
+            $this->defineControllerNameSpaceForCleanUrl();
             $this->defineControllerClassName();
 
             $this->checkActionAvailableToRun();
@@ -160,7 +176,7 @@ abstract class App implements AppInterface
             }
             $this->addThrowable($e);
             $this->setControllerName($this->getParam('exceptionControllerName'));
-            $this->defineControllerClassName(true);
+            $this->defineControllerClassName(true); // todo trying find api classes in exceptions bad idea
             $this->setActionName($this->getParam('exceptionMethodName'));
 
             $out = $this->runController();
@@ -194,6 +210,30 @@ abstract class App implements AppInterface
         return call_user_func_array($match['target'], $match['params']);
     }
 
+    public function getRoute(): array
+    {
+        return $this->route;
+    }
+
+    /**
+     * Define controller name space.
+     */
+    protected function defineControllerNameSpaceForCleanUrl(): void
+    {
+        if (array_key_first($this->route) === $this->getApiKey()) {
+
+            $this->controllerNameSpace = $this->params['apiNameSpace'] . $this->route[$this->getApiKey()] . $this->params['apiControllerNameSpace'];
+
+        } elseif (array_key_first($this->route) === $this->getModuleKey()) {
+
+            $this->controllerNameSpace = $this->params['moduleNameSpace'] . $this->route[$this->getModuleKey()]  . $this->params['moduleControllerNameSpace'];
+
+        } else {
+
+            $this->controllerNameSpace = $this->getControllerNameSpace();
+        }
+    }
+
     /**
      * Define controller class name for running.
      * @param bool $doSearchInApp Force search class name in app dir.
@@ -202,18 +242,17 @@ abstract class App implements AppInterface
     {
         $controllerName = $this->getControllerName() . ucfirst($this->getControllerKey());
 
+        // define name space
+        /*
         if (!$doSearchInApp && $this->apiName) {
-
             $controllerClassName = $this->params['apiNameSpace'] . $this->apiName . $this->params['apiControllerNameSpace'] . $controllerName;
-
         } elseif (!$doSearchInApp && $this->moduleName) {
-
             $controllerClassName = $this->params['moduleNameSpace'] . $this->moduleName . $this->params['moduleControllerNameSpace'] . $controllerName;
-
         } else {
-
             $controllerClassName = $this->getControllerNameSpace() . $controllerName;
-        }
+        }*/
+
+        $controllerClassName = $this->controllerNameSpace . $controllerName;
 
         $this->setControllerClassName($controllerClassName);
     }
