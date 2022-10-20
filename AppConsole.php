@@ -4,37 +4,40 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
-use function var_dump;
-
 /**
- * Responsible for AppConsole work.
+ * Responsible for console work.
  */
 class AppConsole extends App
 {
-    protected function getControllerNameSpace(): string
-    {
-        return $this->getParam('consoleControllerNameSpace');
-    }
-
+    /**
+     * Define console params.
+     * Signature of console parameters definition: key1=val1
+     */
     protected function defineRequestParams(): void
     {
         $params = [];
         foreach ($_SERVER['argv'] as $argument) {
             $explodedValue = explode('=', $argument);
 
-            // Signature of console parameters definition: key1=val1
             if (count($explodedValue) === 2) {
                 [$key, $value] = $explodedValue;
                 $params[$key] = $value;
             }
         }
 
-//        $this->requestParams = $params; // todo check and delete
         $this->requestGetParams = $params; // rename as requestParams or console params
     }
 
     /**
-     * @return mixed
+     * @inheritdoc
+     */
+    protected function getControllerNameSpace(): string
+    {
+        return $this->getParam('consoleControllerNameSpace');
+    }
+
+    /**
+     * @return int|void
      */
     protected function runController()
     {
@@ -49,11 +52,4 @@ class AppConsole extends App
     {
         exit($out);
     }
-
-    public function getSession(): ?Session
-    {
-        // sometime it make sense for tests
-        return null;
-    }
 }
-

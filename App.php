@@ -99,7 +99,7 @@ abstract class App implements AppInterface
     abstract protected function defineRequestParams(): void;
 
     /**
-     * Return controller namespace according to PSR-4.
+     * Return controller name space accroding to app type (console|web) and PSR-4.
      */
     abstract protected function getControllerNameSpace(): string;
 

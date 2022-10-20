@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
+/**
+ * Responsible for web app controller.
+ */
 abstract class WebController extends Controller
 {
     protected AppWeb $app;
@@ -20,10 +23,4 @@ abstract class WebController extends Controller
     {
         $this->app->getResponseHeader()->redirect($url);
     }
-
-    protected static function getCsrfTokenName(): string
-    {
-        return 'csrfToken';
-    }
-
 }

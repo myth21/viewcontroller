@@ -12,10 +12,12 @@ use PDOStatement;
 use PDO;
 
 /**
- * Class PdoRecord is PDO wrapper
+ * Class PdoRecord is PDO wrapper.
+ * Can this class work with mysql, postgress?
  */
 class PdoRecord implements TableRecord
 {
+    // todo what formats existing?
     protected const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     protected const DATE_FORMAT = 'Y-m-d';
 
@@ -25,6 +27,8 @@ class PdoRecord implements TableRecord
     protected static string $primaryKeyName = 'id';
 
     /**
+     * Default value of primary field.
+     *
      * @var string|int|float|null
      */
     protected $id = null;
@@ -34,6 +38,13 @@ class PdoRecord implements TableRecord
      */
     protected static bool $isSequenceObjectId = true;
 
+    /**
+     * Init this wrapper. Create PDO, set attributes and save link to him.
+     *
+     * @param string $dsn
+     * @param array $pdoAttributes
+     * @param array|null $options
+     */
     public static function initPdo(string $dsn, array $pdoAttributes = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION], array $options = null): void
     {
         self::$dsn = $dsn;
@@ -60,7 +71,9 @@ class PdoRecord implements TableRecord
     }
 
     /**
-     * @return string|int|float|null
+     * Return value of primary table key.
+     *
+     * @return string|int|float|null For SQLite...
      */
     public function getPrimaryKey()
     {
@@ -85,12 +98,18 @@ class PdoRecord implements TableRecord
 
     protected function beforeInsert(){}
 
+    /**
+     * Run before updating.
+     */
     protected function beforeUpdate()
     {
         // Disabled foreign key default.
         static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
     }
 
+    /**
+     * Run before deleting.
+     */
     protected function beforeDelete()
     {
         // Disabled foreign key default.
@@ -98,13 +117,16 @@ class PdoRecord implements TableRecord
     }
 
     /**
-     * Return child available attributes
+     * Return subclass available attributes, associative arraay.
      */
     public static function getAvailableAttributes(): array
     {
         return [];
     }
 
+    /**
+     * Return attribute label.
+     */
     public static function getLabel(string $attr): string
     {
         $availableAttributes = static::getAvailableAttributes();
@@ -112,13 +134,18 @@ class PdoRecord implements TableRecord
     }
 
     /**
-     * Return child available attributes
+     * Return subclass available attribute names.
      */
     protected function getAttributes(): array
     {
         return array_keys(static::getAvailableAttributes());
     }
 
+    /**
+     * Factory creates subclass object.
+     *
+     * @return static
+     */
     public static function getNew(): static
     {
         $className = get_called_class();
@@ -126,7 +153,8 @@ class PdoRecord implements TableRecord
     }
 
     /**
-     * Trying to determine the table name through child class name (syntactic sugar)
+     * Trying to determine the table name through subclass name (syntactic sugar).
+     *
      * @throws ReflectionException
      */
     public static function getTableName(): string
@@ -138,19 +166,20 @@ class PdoRecord implements TableRecord
         return mb_strtolower($shortName);
     }
 
+    /**
+     * Try to define existing record in table
+     */
     public function isNew(): bool
     {
         return is_null($this->getPrimaryKey());
     }
 
-    public function isOld(): bool
-    {
-        return !$this->isNew();
-    }
-
     /**
+     * Return model by primary table key.
+     *
      * @param string|int|float|null $primaryKey
      * @throws ReflectionException
+     *
      * @return static|null
      */
     public static function getPrimary($primaryKey): static|null
@@ -170,6 +199,8 @@ class PdoRecord implements TableRecord
     }
 
     /**
+     * Return models by params.
+     *
      * @param array $params
      * @return static[]
      * @throws ReflectionException
@@ -196,6 +227,8 @@ class PdoRecord implements TableRecord
     }
 
     /**
+     * Return the first model of model list.
+     *
      * @param array $params
      * @throws ReflectionException
      * @return static|null
@@ -220,6 +253,9 @@ class PdoRecord implements TableRecord
         return self::$pdo->prepare($sql);
     }
 
+    /*
+     * Return all record by clean sql.
+     */
     public static function sqlFetchAll(string $sql, int $fetchMode = null, string $className = null): array
     {
         $pdoStatement = self::$pdo->prepare($sql);
@@ -239,6 +275,9 @@ class PdoRecord implements TableRecord
         return $pdoStatement->fetchAll();
     }
 
+    /*
+     * Return a record by clean sql.
+     */
     public static function sqlFetch(string $sql, int $fetchMode = null, string $className = null)
     {
         $pdoStatement = self::$pdo->prepare($sql);
@@ -259,7 +298,10 @@ class PdoRecord implements TableRecord
     }
 
     /**
+     * Return records count by params.
+     *
      * @param array $params
+     *
      * @return int
      * @throws ReflectionException
      */
@@ -271,6 +313,8 @@ class PdoRecord implements TableRecord
     }
 
     /**
+     * Delete record is realted with current object (model).
+     *
      * @return bool
      * @throws ReflectionException
      */
@@ -289,7 +333,10 @@ class PdoRecord implements TableRecord
     }
 
     /**
+     * Delete all records by ids.
+     *
      * @param array $ids
+     *
      * @return bool
      * @throws ReflectionException
      */
@@ -306,6 +353,8 @@ class PdoRecord implements TableRecord
 
         return $pdoStatement->execute();
     }
+
+
 
     /**
      * @return bool

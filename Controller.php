@@ -5,27 +5,41 @@ declare(strict_types=1);
 namespace myth21\viewcontroller;
 
 /**
- * Class Controller
- * is used to be common app controller
- * @package myth21\viewcontroller
+ * Responsible for common app controller.
  */
 abstract class Controller
 {
     use UrlQueryManager;
 
+    /**
+     * View file manager.
+     */
     protected ?View $view = null;
 
+    /**
+     * Controller constructor.
+     *
+     * @param App|null $app
+     */
     public function __construct(App $app = null)
     {
         $this->app = $app;
         $this->init();
     }
 
-    protected function init()
-    {
+    /**
+     * Inits methods of child classes.
+     */
+    protected function init(){}
 
-    }
-
+    /**
+     * Create View.
+     *
+     * @param string $absolutePathToTemplateDir
+     * @param string|null $templateFileName
+     *
+     * @return View
+     */
     public function createView(string $absolutePathToTemplateDir, string $templateFileName = null): View
     {
         $this->view = new View();

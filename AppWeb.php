@@ -9,8 +9,7 @@ use function parse_url;
 use const PHP_URL_PATH;
 
 /**
- * Class AppWeb
- * @package myth21\viewcontroller
+ * Responsible for web work.
  */
 class AppWeb extends App
 {
@@ -19,7 +18,9 @@ class AppWeb extends App
     protected const POST_REQUEST_METHOD = 'POST';
     protected const PUT_REQUEST_METHOD = 'PUT';
     protected const DELETE_REQUEST_METHOD = 'DELETE';
-    // other methods...
+    protected const PATCH_REQUEST_METHOD = 'PATCH';
+    protected const CONNECT_REQUEST_METHOD = 'CONNECT';
+    protected const TRACE_REQUEST_METHOD = 'TRACE';
 
     protected ?string $requestMethod = null;
     protected ?string $requestUri = null;
@@ -37,61 +38,17 @@ class AppWeb extends App
 
     protected function defineRequestParams(): void
     {
-//        $this->requestParams = $_REQUEST;
         $this->requestGetParams = $_GET;
         $this->requestPostParams = $_POST;
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->requestUri = $_SERVER['REQUEST_URI'];
         $this->requestUriPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $this->isAjaxRequest = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
-        // and so on
     }
 
-    public function isAjaxRequest(): bool
-    {
-        return $this->isAjaxRequest;
-    }
-
-    public function getSession(): Session
-    {
-        return $this->session;
-    }
-
-    public function getRequestMethod(): string
-    {
-        return $this->requestMethod;
-    }
-
-    public function getRequestUri(): string
-    {
-        return $this->requestUri;
-    }
-
-    public function getRequestUriPath(): string
-    {
-        return $this->requestUriPath;
-    }
-
-    public function isPutRequest(): bool
-    {
-        return $this->requestMethod === static::PUT_REQUEST_METHOD;
-    }
-
-    public function isGetRequest(): bool
-    {
-        return $this->requestMethod === static::GET_REQUEST_METHOD;
-    }
-
-    public function isPostRequest(): bool
-    {
-        return $this->requestMethod === static::POST_REQUEST_METHOD;
-    }
-
-    public function isDeleteRequest(): bool
-    {
-        return $this->requestMethod === static::DELETE_REQUEST_METHOD;
-    }
-
+    /**
+     * @inheritdoc
+     */
     protected function getControllerNameSpace(): string
     {
         return $this->getParam('webControllerNameSpace');
@@ -123,5 +80,48 @@ class AppWeb extends App
         return $this->responseHeader;
     }
 
+    public function isAjaxRequest(): bool
+    {
+        return $this->isAjaxRequest;
+    }
 
+    public function getSession(): Session
+    {
+        return $this->session;
+    }
+
+    public function getRequestMethod(): string
+    {
+        return $this->requestMethod;
+    }
+
+    public function getRequestUri(): string
+    {
+        return $this->requestUri;
+    }
+
+    public function getRequestUriPath(): string
+    {
+        return $this->requestUriPath;
+    }
+
+    public function isGetRequest(): bool
+    {
+        return $this->requestMethod === static::GET_REQUEST_METHOD;
+    }
+
+    public function isPostRequest(): bool
+    {
+        return $this->requestMethod === static::POST_REQUEST_METHOD;
+    }
+
+    public function isPutRequest(): bool
+    {
+        return $this->requestMethod === static::PUT_REQUEST_METHOD;
+    }
+
+    public function isDeleteRequest(): bool
+    {
+        return $this->requestMethod === static::DELETE_REQUEST_METHOD;
+    }
 }
