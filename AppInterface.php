@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace myth21\viewcontroller;
 
 /**
- * Describe framework engine run.
+ * Describes app run.
  */
-interface Engine
+interface AppInterface
 {
     /**
-     * @return mixed
+     * Run request processing logic.
      */
     public function run();
 }

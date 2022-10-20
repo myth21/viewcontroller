@@ -9,6 +9,9 @@ use BadMethodCallException;
 
 use function method_exists;
 
+use function print_r;
+use function var_dump;
+
 use const PHP_SAPI;
 
 /**
@@ -18,7 +21,7 @@ use const PHP_SAPI;
  * @property Throwable[] $throwableChain
  * @property array $params Config params.
  */
-abstract class App implements Engine
+abstract class App implements AppInterface
 {
     use UrlQueryManager;
 
@@ -54,8 +57,9 @@ abstract class App implements Engine
 
     /**
      * Request params from GET, POST and others.
+     * @deprecated
      */
-    protected array $requestParams = [];
+//    protected array $requestParams = [];
 
     /**
      * Request GET params.
@@ -88,19 +92,27 @@ abstract class App implements Engine
     abstract protected function getControllerNameSpace(): string;
 
     /**
-     * @param mixed $out
-     * @return mixed
-     * // TODO check for moving output in index.
+     * Output handled request result.
+     * @param string|int $out
      */
-    abstract protected function out($out);
+    abstract protected function out(string|int $out): void;
 
-    public function __construct(private array $params)
+
+    /**
+     * Constructor.
+     *
+     * @param array $params
+     */
+    public function __construct(protected array $params)
     {
-        //$this->params = $params;
+        // TODO getting vendor params only.
     }
 
     /**
      * Create concrete app object.
+     *
+     * @param array $params
+     * @return App
      */
     public static function factory(array $params): static
     {
@@ -109,10 +121,9 @@ abstract class App implements Engine
     }
 
     /**
-     * Execute request processing of the concrete app object.
-     * TODO return
+     * Run request processing of the concrete app object.
      */
-    public function run()
+    public function run(): void
     {
         $this->defineRequestParams();
 
@@ -121,11 +132,13 @@ abstract class App implements Engine
                 foreach ($route as $param => $value) {
                     // $this->setRequestParam($param, $value);
                     // todo implement in child class web or console
-                    if (PHP_SAPI === 'cli') {
-                        $this->setRequestParam($param, $value);
-                    } else {
-                        $this->setRequestGetParam($param, $value);
-                    }
+//                    if (PHP_SAPI === 'cli') {
+////                        $this->setRequestParam($param, $value);
+//                        $this->setRequestGetParam($param, $value);
+//                    } else {
+//                        $this->setRequestGetParam($param, $value);
+//                    }
+                    $this->setRequestGetParam($param, $value);
                 }
             }
 
@@ -248,16 +261,19 @@ abstract class App implements Engine
 
     /**
      * Set request param.
+     * @deprecated
      */
-    protected function setRequestParam(string $key, $value): void
-    {
-        $this->requestParams[$key] = $value;
-    }
+//    protected function setRequestParam(string $key, $value): void
+//    {
+//        $this->requestParams[$key] = $value;
+//    }
 
     /**
-     * Set request GET param.
+     * Set request param. It can be http or console param.
+     * @param string $key
+     * @param string $value
      */
-    protected function setRequestGetParam(string $key, $value): void
+    protected function setRequestGetParam(string $key, string $value): void
     {
         $this->requestGetParams[$key] = $value;
     }
@@ -388,19 +404,21 @@ abstract class App implements Engine
 
     /**
      * Return request params.
+     * @deprecated
      */
-    public function getRequestParams(): array
-    {
-        return $this->requestParams;
-    }
+//    public function getRequestParams(): array
+//    {
+//        return $this->requestParams;
+//    }
 
     /**
      * Return request param by key.
+     * @deprecated
      */
-    public function getRequestParam(string $name): ?string
-    {
-        return $this->requestParams[$name] ?? null;
-    }
+//    public function getRequestParam(string $name): ?string
+//    {
+//        return $this->requestParams[$name] ?? null;
+//    }
 
     /**
      * Return request param by key.
@@ -408,6 +426,14 @@ abstract class App implements Engine
     public function getRequestGetParam(string $name): ?string
     {
         return $this->requestGetParams[$name] ?? null;
+    }
+
+    /**
+     * Return request get params.
+     */
+    public function getRequestGetParams(): array
+    {
+        return $this->requestGetParams;
     }
 
     /**

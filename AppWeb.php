@@ -28,7 +28,7 @@ class AppWeb extends App
     protected Session $session;
     protected ?ResponseHeader $responseHeader = null;
 
-    public function __construct(array $params)
+    public function __construct(protected array $params)
     {
         parent::__construct($params);
 
@@ -37,13 +37,14 @@ class AppWeb extends App
 
     protected function defineRequestParams(): void
     {
-        $this->requestParams = $_REQUEST;
+//        $this->requestParams = $_REQUEST;
         $this->requestGetParams = $_GET;
         $this->requestPostParams = $_POST;
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->requestUri = $_SERVER['REQUEST_URI'];
         $this->requestUriPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $this->isAjaxRequest = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+        // and so on
     }
 
     public function isAjaxRequest(): bool
@@ -110,7 +111,7 @@ class AppWeb extends App
     /**
      * @param mixed $out
      */
-    protected function out($out): void
+    protected function out(string|int $out): void
     {
         $this->responseHeader->sendHeaders();
 

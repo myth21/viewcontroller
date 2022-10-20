@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
+use function var_dump;
+
 /**
- * Class AppConsole
- * @package myth21\viewcontroller
+ * Responsible for AppConsole work.
  */
 class AppConsole extends App
 {
@@ -18,17 +19,17 @@ class AppConsole extends App
     protected function defineRequestParams(): void
     {
         $params = [];
-        foreach ($_SERVER['argv'] as $value) {
-            $explodedValue = explode('=', $value);
+        foreach ($_SERVER['argv'] as $argument) {
+            $explodedValue = explode('=', $argument);
 
-            if (sizeof($explodedValue) === 2) {
-                $key = $explodedValue[0];
-                $value = $explodedValue[1];
+            // Signature of console parameters definition: key1=val1
+            if (count($explodedValue) === 2) {
+                [$key, $value] = $explodedValue;
                 $params[$key] = $value;
             }
         }
 
-        $this->requestParams = $params; // todo check and delete
+//        $this->requestParams = $params; // todo check and delete
         $this->requestGetParams = $params; // rename as requestParams or console params
     }
 
@@ -42,9 +43,9 @@ class AppConsole extends App
     }
 
     /**
-     * @param mixed $out
+     * @param string|int $out
      */
-    protected function out($out): void
+    protected function out(string|int $out): void
     {
         exit($out);
     }
