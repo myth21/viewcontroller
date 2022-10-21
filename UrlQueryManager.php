@@ -5,30 +5,51 @@ declare(strict_types=1);
 namespace myth21\viewcontroller;
 
 /**
- * Creates url query string (use "dirty" url)
+ * Provide methods for working with url query string (use "dirty" url).
  */
 trait UrlQueryManager
 {
+    /**
+     * Return module key name.
+     */
     public function getModuleKey(): string
     {
         return 'module';
     }
 
+    /**
+     * Return api key name.
+     */
     public function getApiKey(): string
     {
         return 'api';
     }
 
+    /**
+     * Return controller key name.
+     */
     public function getControllerKey(): string
     {
         return 'controller';
     }
 
+    /**
+     * Return action key name.
+     */
     public function getActionKey(): string
     {
         return 'action';
     }
 
+    /**
+     * Return a combination of query string url by keys.
+     *
+     * @param string $controller
+     * @param string $action
+     * @param array $params
+     *
+     * @return string
+     */
     public function createUrl(string $controller = '', string $action = '', array $params = []): string
     {
         if (!$controller && !$action && !$params) {

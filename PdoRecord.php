@@ -13,7 +13,7 @@ use PDO;
 
 /**
  * Class PdoRecord is PDO wrapper.
- * Can this class work with mysql, postgress?
+ * Can this class work with mysql, postgres?
  */
 class PdoRecord implements TableRecord
 {
@@ -167,7 +167,7 @@ class PdoRecord implements TableRecord
     }
 
     /**
-     * Try to define existing record in table
+     * Try to define existing record by primary table key.
      */
     public function isNew(): bool
     {
@@ -175,14 +175,14 @@ class PdoRecord implements TableRecord
     }
 
     /**
-     * Return model by primary table key.
+     * Return subclass object by primary table key.
      *
      * @param string|int|float|null $primaryKey
-     * @throws ReflectionException
      *
      * @return static|null
+     * @throws ReflectionException
      */
-    public static function getPrimary($primaryKey): static|null
+    public static function getPrimary(float|int|string|null $primaryKey): static|null
     {
         if (is_null($primaryKey)) {
             return null;
@@ -199,7 +199,7 @@ class PdoRecord implements TableRecord
     }
 
     /**
-     * Return models by params.
+     * Return subclass objects (models) by params.
      *
      * @param array $params
      * @return static[]
@@ -254,7 +254,7 @@ class PdoRecord implements TableRecord
     }
 
     /*
-     * Return all record by clean sql.
+     * Return all records by clean sql.
      */
     public static function sqlFetchAll(string $sql, int $fetchMode = null, string $className = null): array
     {
@@ -313,7 +313,7 @@ class PdoRecord implements TableRecord
     }
 
     /**
-     * Delete record is realted with current object (model).
+     * Delete record is related with current object (model).
      *
      * @return bool
      * @throws ReflectionException
@@ -354,11 +354,11 @@ class PdoRecord implements TableRecord
         return $pdoStatement->execute();
     }
 
-
-
     /**
-     * @return bool
+     * Insert model record.
+     *
      * @throws ReflectionException
+     * @return bool
      */
     public function insert(): bool
     {
@@ -382,6 +382,8 @@ class PdoRecord implements TableRecord
     }
 
     /**
+     * Update model record.
+     *
      * @return bool
      * @throws ReflectionException
      */
@@ -401,6 +403,13 @@ class PdoRecord implements TableRecord
         return false;
     }
 
+    /**
+     * Return formatted available attributes for inserting.
+     *
+     * @param bool $isAddBindSeparator
+     *
+     * @return string
+     */
     private function getInsertingAvailableAttributes(bool $isAddBindSeparator = false): string
     {
         $out = '';
@@ -412,6 +421,9 @@ class PdoRecord implements TableRecord
         return $out;
     }
 
+    /**
+     * Return formatted available values for inserting.
+     */
     private function getInsertingAvailableValues(): array
     {
         $out = [];
@@ -425,15 +437,22 @@ class PdoRecord implements TableRecord
         return $out;
     }
 
+    /**
+     * Return formatted available values for inserting, like title=:tile, ...
+     */
     private function getUpdatingAvailableValues(): string
     {
         $out = '';
         foreach ($this->getAttributes() as $attr) {
-            $out .= $attr . '=:' . $attr . ','; // string like title=:tile, ...
+            $out .= $attr . '=:' . $attr . ',';
         }
+
         return substr($out, 0, -1);
     }
 
+    /**
+     * Binds attributes and values.
+     */
     private function bindAvailableValues(): void
     {
         foreach ($this->getAttributes() as $attr) {
@@ -445,6 +464,9 @@ class PdoRecord implements TableRecord
         }
     }
 
+    /**
+     * Return formatted values for deleting, like 1,2,...
+     */
     private static function getDeletingIdsString(array $ids): string
     {
         $idsString = '';
@@ -456,6 +478,13 @@ class PdoRecord implements TableRecord
         return substr($idsString, 0, -1);
     }
 
+    /**
+     * Return escaped string for secure inserting.
+     *
+     * @param string $value
+     *
+     * @return string
+     */
     private static function getEscapeString(string $value): string
     {
         // \SQLite3::escapeString($value); // hmm... it does not work as I expect

@@ -22,13 +22,41 @@ class AppWeb extends App
     protected const CONNECT_REQUEST_METHOD = 'CONNECT';
     protected const TRACE_REQUEST_METHOD = 'TRACE';
 
+    /**
+     * HTTP request method.
+     */
     protected ?string $requestMethod = null;
+
+    /**
+     * Request URI.
+     */
     protected ?string $requestUri = null;
+
+    /**
+     * Request URI path, part of URI.
+     */
     protected ?string $requestUriPath = null;
+
+    /**
+     * Whether AJAX request.
+     */
     protected bool $isAjaxRequest = false;
+
+    /***
+     * Server session object.
+     */
     protected Session $session;
+
+    /**
+     * Response header object.
+     */
     protected ?ResponseHeader $responseHeader = null;
 
+    /**
+     * Class constructor.
+     *
+     * @param array $params
+     */
     public function __construct(protected array $params)
     {
         parent::__construct($params);
@@ -36,6 +64,9 @@ class AppWeb extends App
         $this->session = new Session();
     }
 
+    /**
+     * Init params from HTTP request and server.
+     */
     protected function defineRequestParams(): void
     {
         $this->requestGetParams = $_GET;
@@ -55,7 +86,7 @@ class AppWeb extends App
     }
 
     /**
-     * @return mixed
+     * Run web controller and return result of processing.
      */
     protected function runController()
     {
@@ -66,7 +97,9 @@ class AppWeb extends App
     }
 
     /**
-     * @param mixed $out
+     * Send output content to requester.
+     *
+     * @param string|int $out
      */
     protected function out(string|int $out): void
     {
@@ -75,51 +108,87 @@ class AppWeb extends App
         print_r($out);
     }
 
+    /**
+     * @return ResponseHeader
+     */
     public function getResponseHeader(): ResponseHeader
     {
         return $this->responseHeader;
     }
 
+    /**
+     * Check whether AJAX request.
+     */
     public function isAjaxRequest(): bool
     {
         return $this->isAjaxRequest;
     }
 
+    /**
+     * @return Session
+     */
     public function getSession(): Session
     {
         return $this->session;
     }
 
+    /**
+     * Return request method name.
+     *
+     * @return string
+     */
     public function getRequestMethod(): string
     {
         return $this->requestMethod;
     }
 
+    /**
+     * Return request URI.
+     *
+     * @return string
+     */
     public function getRequestUri(): string
     {
         return $this->requestUri;
     }
 
+    /**
+     * Return request URI part.
+     *
+     * @return string
+     */
     public function getRequestUriPath(): string
     {
         return $this->requestUriPath;
     }
 
+    /**
+     * Check whether GET request.
+     */
     public function isGetRequest(): bool
     {
         return $this->requestMethod === static::GET_REQUEST_METHOD;
     }
 
+    /**
+     * Check whether POST request.
+     */
     public function isPostRequest(): bool
     {
         return $this->requestMethod === static::POST_REQUEST_METHOD;
     }
 
+    /**
+     * Check whether PUT request.
+     */
     public function isPutRequest(): bool
     {
         return $this->requestMethod === static::PUT_REQUEST_METHOD;
     }
 
+    /**
+     * Check whether DELETE request.
+     */
     public function isDeleteRequest(): bool
     {
         return $this->requestMethod === static::DELETE_REQUEST_METHOD;

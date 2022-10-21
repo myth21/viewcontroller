@@ -9,10 +9,7 @@ use BadMethodCallException;
 
 use function array_key_first;
 use function method_exists;
-
-use function print_r;
 use function ucfirst;
-use function var_dump;
 
 use const PHP_SAPI;
 
@@ -56,12 +53,6 @@ abstract class App implements AppInterface
      * Stack of throwable objects.
      */
     private array $throwableChain;
-
-    /**
-     * Request params from GET, POST and others.
-     * @deprecated
-     */
-//    protected array $requestParams = [];
 
     /**
      * Request GET params.
@@ -109,6 +100,10 @@ abstract class App implements AppInterface
      */
     abstract protected function out(string|int $out): void;
 
+    /**
+     * Run a controller and return result of processing.
+     */
+    abstract protected function runController();
 
     /**
      * Constructor.

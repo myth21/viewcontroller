@@ -6,10 +6,19 @@ namespace myth21\viewcontroller;
 
 use RuntimeException;
 
+/**
+ * Responsible for session work.
+ */
 class Session
 {
+    /**
+     * Session data.
+     */
     private array $data = [];
 
+    /**
+     * Constructor.
+     */
     public function __construct()
     {
         if (headers_sent()) {
@@ -22,6 +31,8 @@ class Session
     }
 
     /**
+     * Set session key and value.
+     *
      * @param string $key
      * @param mixed $value
      */
@@ -30,14 +41,21 @@ class Session
         $this->data[$key] = $value;
     }
 
+    /**
+     * Check existing key in session data.
+     */
     public function has(string $key): bool
     {
         return isset($this->data[$key]);
     }
 
     /**
+     * Return session value by key.
+     * Whether to delete the data on getting from session.
+     *
      * @param string $key
      * @param bool $delete
+     *
      * @return mixed
      */
     public function get(string $key, bool $delete = false): mixed
@@ -50,16 +68,31 @@ class Session
         return $value;
     }
 
+    /**
+     * Delete data from session by kye.
+     *
+     * @param string $key
+     */
     public function delete(string $key): void
     {
         unset($this->data[$key]);
     }
 
+    /**
+     * Destroy session.
+     *
+     * @return bool
+     */
     public function destroy(): bool
     {
         return session_destroy();
     }
 
+    /**
+     * Get session data.
+     *
+     * @return array
+     */
     public function getData(): array
     {
         return $this->data;

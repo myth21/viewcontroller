@@ -37,7 +37,7 @@ class AppConsole extends App
     }
 
     /**
-     * @return int|void
+     * Run console controller and return result of processing.
      */
     protected function runController()
     {
@@ -46,6 +46,8 @@ class AppConsole extends App
     }
 
     /**
+     * Send output content to requester.
+     *
      * @param string|int $out
      */
     protected function out(string|int $out): void
