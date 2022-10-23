@@ -22,7 +22,8 @@ class PdoRecord implements TableRecord
     protected const DATE_FORMAT = 'Y-m-d';
 
     protected static ?string $dsn = null;
-    protected static ?PDO $pdo = null;
+//    protected static ?PDO $pdo = null;
+    protected static PDO $pdo;
     protected ?PDOStatement $pdoStatement = null;
     protected static string $primaryKeyName = 'id';
 

@@ -169,6 +169,14 @@ abstract class App implements AppInterface
 
         } catch (Throwable $e) {
 
+            $message = '['.date('Y-m-d H:i:s').']' . PHP_EOL;
+            $message .= $e->getMessage() . PHP_EOL;
+            $message .= $e->getFile() . ':' . $e->getLine() . PHP_EOL;
+            $message .= PHP_EOL;
+            $errorLogPath = $this->getParam('exceptionLogFileName');
+            // is_writable($errorLogPath)
+            file_put_contents($errorLogPath, $message);
+
             // clear previous buffer outputs
             while (ob_get_level()) {
                 ob_end_clean();
@@ -179,6 +187,8 @@ abstract class App implements AppInterface
             //  $this->defineControllerNameSpace();
             if ($this->isRequestToApi()) {
                 $this->controllerNameSpace = $this->getParam('apiExceptionControllerNameSpace');
+            } else {
+                $this->defineControllerNameSpace();
             }
 
             $this->setControllerName($this->getParam('exceptionControllerName'));
