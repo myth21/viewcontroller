@@ -151,14 +151,16 @@ abstract class App implements AppInterface
                     // Set param from route like GET param
                     $this->setRequestGetParam($param, $value);
                 }
+
+
             }
+
+            $this->defineControllerNameSpace();
 
             //$this->setModuleName($this->getRequestModuleName());
             //$this->setApiName($this->getRequestApiName());
             $this->setControllerName($this->getRequestControllerName());
             $this->setActionName($this->getRequestActionName());
-
-            $this->defineControllerNameSpace();
             $this->defineControllerClassName();
 
             $this->checkActionAvailableToRun();
@@ -172,12 +174,32 @@ abstract class App implements AppInterface
                 ob_end_clean();
             }
             $this->addThrowable($e);
-
             // Set handler controller on throwable error
+
+            //  $this->defineControllerNameSpace();
+            if ($this->isRequestToApi()) {
+                $this->controllerNameSpace = $this->getParam('apiExceptionControllerNameSpace');
+            }
+
             $this->setControllerName($this->getParam('exceptionControllerName'));
             $this->setActionName($this->getParam('exceptionMethodName'));
-            $this->defineControllerClassName(); // todo trying find api classes in exceptions bad idea
+            $this->defineControllerClassName();
 
+//            echo '111<pre>';
+//            print_r($this->controllerNameSpace);
+//            echo '</pre>';
+//            echo '222<pre>';
+//            print_r($this->controllerClassName);
+//            echo '</pre>';
+//            exit;
+//            echo '<pre>';
+//            print_r($this->controllerNameSpace);
+//            echo '</pre>';
+//            $this->defineControllerClassName();
+//            echo '<pre>';
+//            print_r($this->controllerClassName);
+//            echo '</pre>';
+//            exit;
             $out = $this->runController();
         }
 
@@ -217,12 +239,17 @@ abstract class App implements AppInterface
         return $this->route;
     }
 
+    public function isRequestToApi(): bool
+    {
+        return array_key_first($this->route) === $this->getApiKey();
+    }
+
     /**
      * Define controller name space.
      */
     protected function defineControllerNameSpace(): void
     {
-        if (array_key_first($this->route) === $this->getApiKey()) {
+        if ($this->isRequestToApi()) {
 
             $this->controllerNameSpace = $this->params['apiNameSpace'] . $this->route[$this->getApiKey()] . $this->params['apiControllerNameSpace'];
 

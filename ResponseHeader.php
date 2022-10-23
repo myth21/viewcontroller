@@ -29,9 +29,10 @@ class ResponseHeader
      *
      * @param int $code
      */
-    public function setStatusCode(int $code): void
+    public function setStatusCode(int $code): static
     {
         $this->statusCode = $code;
+        return $this;
     }
 
     /**
