@@ -224,6 +224,25 @@ abstract class App implements AppInterface
     protected function createRoute(): array
     {
         $this->router = new AltoRouter();
+
+        // Temp code to testing
+        $this->router->map('GET', '/api/[a:api]/[i:id]/', static function($api, $id) {
+            return [
+                'api' => $api,
+                'controller' => 'Index',
+                'action' => 'get',
+                'id' => $id,
+            ];
+        }, 'api-get-one');
+        $this->router->map('PUT', '/api/[a:api]/[i:id]/', static function($api, $id) {
+            return [
+                'api' => $api,
+                'controller' => 'Index',
+                'action' => 'put',
+                'id' => $id,
+            ];
+        }, 'api-update-one');
+
         foreach ($this->params['routes'] as $urlPattern => $handler) {
             $this->router->map($handler['method'], $urlPattern, $handler['func'], $handler['name']);
         }
