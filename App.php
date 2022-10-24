@@ -195,21 +195,6 @@ abstract class App implements AppInterface
             $this->setActionName($this->getParam('exceptionMethodName'));
             $this->defineControllerClassName();
 
-//            echo '111<pre>';
-//            print_r($this->controllerNameSpace);
-//            echo '</pre>';
-//            echo '222<pre>';
-//            print_r($this->controllerClassName);
-//            echo '</pre>';
-//            exit;
-//            echo '<pre>';
-//            print_r($this->controllerNameSpace);
-//            echo '</pre>';
-//            $this->defineControllerClassName();
-//            echo '<pre>';
-//            print_r($this->controllerClassName);
-//            echo '</pre>';
-//            exit;
             $out = $this->runController();
         }
 
@@ -225,27 +210,15 @@ abstract class App implements AppInterface
     {
         $this->router = new AltoRouter();
 
-        // Temp code to testing
-        $this->router->map('GET', '/api/[a:api]/[i:id]/', static function($api, $id) {
-            return [
-                'api' => $api,
-                'controller' => 'Index',
-                'action' => 'get',
-                'id' => $id,
-            ];
-        }, 'api-get-one');
-        $this->router->map('PUT', '/api/[a:api]/[i:id]/', static function($api, $id) {
-            return [
-                'api' => $api,
-                'controller' => 'Index',
-                'action' => 'put',
-                'id' => $id,
-            ];
-        }, 'api-update-one');
+        foreach ($this->params['routes'] as $route) {
+            $this->router->map($route['method'], $route['urlPattern'], $route['func'], $route['name']);
+        }
 
+        /*
         foreach ($this->params['routes'] as $urlPattern => $handler) {
             $this->router->map($handler['method'], $urlPattern, $handler['func'], $handler['name']);
         }
+        */
 
         $match = $this->router->match();
 
