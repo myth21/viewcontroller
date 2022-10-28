@@ -173,7 +173,7 @@ abstract class App implements AppInterface
             $message .= $e->getMessage() . PHP_EOL;
             $message .= $e->getFile() . ':' . $e->getLine() . PHP_EOL;
             $message .= PHP_EOL;
-            $errorLogPath = $this->getParam('exceptionLogFileName');
+            $errorLogPath = $this->getParam('throwableLogFileName');
             // is_writable($errorLogPath)
             file_put_contents($errorLogPath, $message);
 

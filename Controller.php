@@ -30,7 +30,10 @@ abstract class Controller
     /**
      * Inits methods of child classes.
      */
-    protected function init(){}
+    protected function init(): void
+    {
+
+    }
 
     /**
      * Create View.
