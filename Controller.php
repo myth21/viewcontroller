@@ -37,6 +37,7 @@ abstract class Controller
 
     /**
      * Create View.
+     * @deprecated ?
      *
      * @param string $absolutePathToTemplateDir
      * @param string|null $templateFileName

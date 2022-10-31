@@ -9,6 +9,7 @@ use BadMethodCallException;
 
 use function array_key_first;
 use function method_exists;
+use function print_r;
 use function ucfirst;
 
 use const PHP_SAPI;
@@ -168,7 +169,13 @@ abstract class App implements AppInterface
             $out = $this->runController();
 
         } catch (Throwable $e) {
-
+//            echo '<pre>';
+//            print_r($e);
+//            echo '</pre>';
+//            echo '<pre>';
+//            print_r($this->params);
+//            echo '</pre>';
+//            exit;
             $message = '['.date('Y-m-d H:i:s').']' . PHP_EOL;
             $message .= $e->getMessage() . PHP_EOL;
             $message .= $e->getFile() . ':' . $e->getLine() . PHP_EOL;

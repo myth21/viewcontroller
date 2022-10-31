@@ -64,7 +64,7 @@ class View implements ViewInterface
     {
         $viewFilePath = $this->absoluteTemplateDirName . $name . '.php';
         if (!is_readable($viewFilePath)) {
-            throw new RuntimeException('View file "' . $viewFilePath. '" not found');
+            throw new RuntimeException('View file "' . $viewFilePath. '" not found', 404);
         }
 
         ob_start();
@@ -111,7 +111,7 @@ class View implements ViewInterface
     public function renderFile(string $name, array $data = []): string
     {
         if (!is_readable($name)) {
-            throw new RuntimeException('View file "' . $name. '" not found');
+            throw new RuntimeException('View file "' . $name. '" not found', 404);
         }
 
         ob_start();
