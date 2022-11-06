@@ -13,16 +13,11 @@ use PDO;
 
 /**
  * Class PdoRecord is PDO wrapper.
- * Can this class work with mysql, postgres?
+ * TODO Can this class work with mysql, postgres?
  */
 class PdoRecord implements TableRecord
 {
-    // todo what formats existing?
-    protected const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
-    protected const DATE_FORMAT = 'Y-m-d';
-
     protected static ?string $dsn = null;
-//    protected static ?PDO $pdo = null;
     protected static PDO $pdo;
     protected ?PDOStatement $pdoStatement = null;
     protected static string $primaryKeyName = 'id';
@@ -56,16 +51,25 @@ class PdoRecord implements TableRecord
         }
     }
 
+    /**
+     * Return PDO object.
+     */
     public static function getPdo(): ?PDO
     {
         return self::$pdo;
     }
 
+    /**
+     * Return DSN string.
+     */
     public static function getDsn(): ?string
     {
         return self::$dsn;
     }
 
+    /**
+     * Return primary key name of a table.
+     */
     public static function getPrimaryKeyName(): string
     {
         return static::$primaryKeyName;
@@ -81,7 +85,9 @@ class PdoRecord implements TableRecord
         return $this->id;
     }
 
-    // TODO remove this method. This class must not do it.
+    /**
+     * @deprecated
+     */
     public function init(array $data = []): void
     {
         foreach ($data as $key => $value) {
@@ -97,6 +103,9 @@ class PdoRecord implements TableRecord
         }
     }
 
+    /**
+     * Call before insert record.
+     */
     protected function beforeInsert(){}
 
     /**
@@ -201,6 +210,7 @@ class PdoRecord implements TableRecord
 
     /**
      * Return subclass objects (models) by params.
+     * Method requires more conditions.
      *
      * @param array $params
      * @return static[]
@@ -245,6 +255,8 @@ class PdoRecord implements TableRecord
     }
 
     /**
+     * Prepare sql query.
+     *
      * @param string $sql
      * @throws PDOException
      * @return bool|PDOStatement
@@ -488,7 +500,7 @@ class PdoRecord implements TableRecord
      */
     private static function getEscapeString(string $value): string
     {
-        // \SQLite3::escapeString($value); // hmm... it does not work as I expect
+        // \SQLite3::escapeString($value); // hmm... it does not work as expect
         // TODO reliable escape method
         return str_replace('"',"'", $value);
     }

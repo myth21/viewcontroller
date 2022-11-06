@@ -44,16 +44,16 @@ abstract class Controller
      *
      * @return View
      */
-    public function createView(string $absolutePathToTemplateDir, string $templateFileName = null): View
-    {
-        $this->view = new View();
-
-        $this->view->setAbsoluteTemplateDirName($absolutePathToTemplateDir);
-
-        $templateFileName = $templateFileName ?? $this->app->getParam('defaultTemplateFileName');
-        $this->view->setTemplateFileName($templateFileName);
-
-        return $this->view;
-    }
+//    public function createView(string $absolutePathToTemplateDir, string $templateFileName = null): View
+//    {
+//        $this->view = new View();
+//
+//        $this->view->setAbsoluteTemplateDirName($absolutePathToTemplateDir);
+//
+//        $templateFileName = $templateFileName ?? $this->app->getParam('defaultTemplateFileName');
+//        $this->view->setTemplateFileName($templateFileName);
+//
+//        return $this->view;
+//    }
 
 }
