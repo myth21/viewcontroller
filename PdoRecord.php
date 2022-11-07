@@ -24,8 +24,10 @@ class PdoRecord implements TableRecord
 
     /**
      * Default value of primary field.
+     *
+     * @var null|int|float|string
      */
-    protected null|int|float|string $id = null;
+    protected $id = null;
 
     /**
      * @link https://www.php.net/manual/en/pdo.lastinsertid.php
@@ -75,8 +77,10 @@ class PdoRecord implements TableRecord
 
     /**
      * Return value of primary table key.
+     *
+     * @return int|float|string (real for sqlite)
      */
-    public function getPrimaryKey(): null|int|float|string
+    public function getPrimaryKey()
     {
         return $this->id;
     }
