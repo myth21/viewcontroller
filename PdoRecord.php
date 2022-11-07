@@ -13,7 +13,7 @@ use PDO;
 
 /**
  * Class PdoRecord is PDO wrapper.
- * TODO Can this class work with mysql, postgres?
+ * Note: class is tested for working with SQLite only.
  */
 class PdoRecord implements TableRecord
 {
@@ -24,10 +24,8 @@ class PdoRecord implements TableRecord
 
     /**
      * Default value of primary field.
-     *
-     * @var string|int|float|null
      */
-    protected $id = null;
+    protected null|int|float|string $id = null;
 
     /**
      * @link https://www.php.net/manual/en/pdo.lastinsertid.php
@@ -77,41 +75,24 @@ class PdoRecord implements TableRecord
 
     /**
      * Return value of primary table key.
-     *
-     * @return string|int|float|null For SQLite...
      */
-    public function getPrimaryKey()
+    public function getPrimaryKey(): null|int|float|string
     {
         return $this->id;
     }
 
     /**
-     * @deprecated
-     */
-    public function init(array $data = []): void
-    {
-        foreach ($data as $key => $value) {
-            if (in_array($key, $this->getAttributes())) {
-                // it should remain NULL if class attribute value by default null
-                // It means that attributes in not initialed and input is empty
-                // TODO via isset($data[$key])?
-                if (empty($data[$key]) && is_null($this->{$key})) {
-                    continue;
-                }
-                $this->{$key} = $value;
-            }
-        }
-    }
-
-    /**
      * Call before insert record.
      */
-    protected function beforeInsert(){}
+    protected function beforeInsert(): void
+    {
+
+    }
 
     /**
      * Run before updating.
      */
-    protected function beforeUpdate()
+    protected function beforeUpdate(): void
     {
         // Disabled foreign key default.
         static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
@@ -120,14 +101,14 @@ class PdoRecord implements TableRecord
     /**
      * Run before deleting.
      */
-    protected function beforeDelete()
+    protected function beforeDelete(): void
     {
         // Disabled foreign key default.
         static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
     }
 
     /**
-     * Return subclass available attributes, associative arraay.
+     * Return subclass available attributes, associative array.
      */
     public static function getAvailableAttributes(): array
     {
@@ -136,6 +117,10 @@ class PdoRecord implements TableRecord
 
     /**
      * Return attribute label.
+     *
+     * @param string $attr Attribute name.
+     *
+     * @return string
      */
     public static function getLabel(string $attr): string
     {
@@ -153,12 +138,11 @@ class PdoRecord implements TableRecord
 
     /**
      * Factory creates subclass object.
-     *
-     * @return static
      */
     public static function getNew(): static
     {
-        $className = get_called_class();
+        //$className = get_called_class();
+        $className = static::class;
         return new $className();
     }
 
@@ -169,7 +153,8 @@ class PdoRecord implements TableRecord
      */
     public static function getTableName(): string
     {
-        $className = get_called_class();
+        //$className = get_called_class();
+        $className = static::class;
         $reflectionClass = new ReflectionClass($className);
         $shortName = $reflectionClass->getShortName();
 
@@ -198,7 +183,7 @@ class PdoRecord implements TableRecord
             return null;
         }
 
-        $sql = 'SELECT * FROM `'. static::getTableName().'` WHERE `'.static::$primaryKeyName.'`="'.$primaryKey.'"';
+        $sql = 'SELECT * FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '`="' . $primaryKey . '"';
         $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement->setFetchMode(PDO::FETCH_CLASS, static::class);
         $pdoStatement->execute();
@@ -213,6 +198,7 @@ class PdoRecord implements TableRecord
      * Method requires more conditions.
      *
      * @param array $params
+     *
      * @return static[]
      * @throws ReflectionException
      */
@@ -241,8 +227,9 @@ class PdoRecord implements TableRecord
      * Return the first model of model list.
      *
      * @param array $params
-     * @throws ReflectionException
+     *
      * @return static|null
+     * @throws ReflectionException
      */
     public static function getOne(array $params = []): ?static
     {
@@ -258,8 +245,9 @@ class PdoRecord implements TableRecord
      * Prepare sql query.
      *
      * @param string $sql
-     * @throws PDOException
+     *
      * @return bool|PDOStatement
+     * @throws PDOException
      */
     public static function getPdoStatement(string $sql): bool|PDOStatement
     {
@@ -335,12 +323,12 @@ class PdoRecord implements TableRecord
     {
         $this->beforeDelete();
 
-        $sql = 'DELETE FROM `'.static::getTableName().'` WHERE `'.static::$primaryKeyName.'`=:'.static::$primaryKeyName;
+        $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName.'`=:' . static::$primaryKeyName;
         $pdoStatement = self::$pdo->prepare($sql);
 
         // Only variables should be passed by reference
         $primaryKey = $this->getPrimaryKey();
-        $pdoStatement->bindParam(':'.static::$primaryKeyName, $primaryKey);
+        $pdoStatement->bindParam(':' . static::$primaryKeyName, $primaryKey);
 
         return $pdoStatement->execute();
     }
@@ -381,13 +369,16 @@ class PdoRecord implements TableRecord
             throw new RuntimeException('Inserting available attributes of '.static::class.' are not found');
         }
 
-        $sql = 'INSERT INTO `'.static::getTableName().'` ('.$this->getInsertingAvailableAttributes().') VALUES ('.$this->getInsertingAvailableAttributes(true).');';
+        $attributeNames = $this->getInsertingAvailableAttributes();
+        $attributeBinds = $this->getInsertingAvailableAttributes(true);
+        $sql = 'INSERT INTO `' . static::getTableName() . '` (' . $attributeNames . ') VALUES (' . $attributeBinds . ');';
         $pdoStatement = self::$pdo->prepare($sql);
         $execute = $pdoStatement->execute($this->getInsertingAvailableValues());
 
         if (static::$isSequenceObjectId) {
             // https://www.php.net/manual/ru/pdo.lastinsertid.php
-            // It means that primary key of child class can be string or false only in SQLite database.
+            // Returns the ID of the last inserted row, or the last value from a sequence object,
+            // depending on the underlying driver.
             $this->{static::$primaryKeyName} = self::$pdo->lastInsertId();
         }
 
@@ -404,7 +395,9 @@ class PdoRecord implements TableRecord
     {
         $this->beforeUpdate();
 
-        $sql = 'UPDATE `'.static::getTableName().'` SET '.$this->getUpdatingAvailableValues().' WHERE `'.static::$primaryKeyName.'`="'.$this->getPrimaryKey().'"';
+        $updatingValues = $this->getUpdatingAvailableValues();
+        $sql = 'UPDATE `' . static::getTableName() . '` SET ' . $updatingValues
+            . ' WHERE `' . static::$primaryKeyName . '`="' . $this->getPrimaryKey() . '"';
         $pdoStatement = self::$pdo->prepare($sql);
 
         if ($pdoStatement instanceof PDOStatement) {
@@ -473,19 +466,23 @@ class PdoRecord implements TableRecord
             if (is_string($value)) {
                 $value = self::getEscapeString($value);
             }
-            $this->pdoStatement->bindValue(':'.$attr, $value);
+            $this->pdoStatement->bindValue(':' . $attr, $value);
         }
     }
 
     /**
      * Return formatted values for deleting, like 1,2,...
+     *
+     * @param array $ids
+     *
+     * @return string
      */
     private static function getDeletingIdsString(array $ids): string
     {
         $idsString = '';
         foreach ($ids as $id) {
             // if $id is int then it will be converted to string, if you would like to us integers then us other method
-            $idsString .= '"'.$id.'",';
+            $idsString .= '"' . $id . '",';
         }
 
         return substr($idsString, 0, -1);

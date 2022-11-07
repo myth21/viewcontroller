@@ -159,9 +159,9 @@ abstract class App implements AppInterface
 
         } catch (Throwable $e) {
 
-            $this->writeLog();
+            $this->writeLog($e);
 
-            // Сlear previous buffer outputs.
+            // Clear previous buffer outputs.
             while (ob_get_level()) {
                 ob_end_clean();
             }
@@ -186,9 +186,11 @@ abstract class App implements AppInterface
     }
 
     /**
-     * Write typical raw (without PSR, standart or like this) in log is specified in params.
+     * Write typical raw (without PSR, standard or like this) in log is specified in params.
+     *
+     * @param Throwable $e
      */
-    protected function writeLog()
+    protected function writeLog(Throwable $e): void
     {
         $message = '['.date('Y-m-d H:i:s').']' . PHP_EOL;
         $message .= $e->getMessage() . PHP_EOL;
