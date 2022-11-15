@@ -338,7 +338,7 @@ class PdoRecord implements TableRecord
     }
 
     /**
-     * Delete all records by ids.
+     * Delete all records by scalar primary ids.
      *
      * @param array $ids
      *
@@ -354,6 +354,29 @@ class PdoRecord implements TableRecord
         $idsString = self::getDeletingIdsString($ids);
 
         $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '` in (' . $idsString . ');';
+        $pdoStatement = self::$pdo->prepare($sql);
+
+        return $pdoStatement->execute();
+    }
+
+    /**
+     * Delete all records by field and scalar ids.
+     *
+     * @param string $field
+     * @param array $ids
+     *
+     * @return bool
+     * @throws ReflectionException
+     */
+    public static function deleteAllByField(string $field, array $ids): bool
+    {
+        if (empty($ids)) {
+            return false;
+        }
+
+        $idsString = self::getDeletingIdsString($ids);
+
+        $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . $field . '` in (' . $idsString . ');';
         $pdoStatement = self::$pdo->prepare($sql);
 
         return $pdoStatement->execute();
