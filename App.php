@@ -118,6 +118,7 @@ abstract class App implements AppInterface
 
     /**
      * Create concrete app object.
+     * If testing then how create AppWeb?
      *
      * @param array $params
      * @return App
