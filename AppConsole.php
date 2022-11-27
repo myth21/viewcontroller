@@ -13,7 +13,7 @@ class AppConsole extends App
      * Define console params.
      * Signature of console parameters definition: key1=val1
      */
-    protected function defineRequestParams(): void
+    public function defineRequestParams(): void
     {
         $params = [];
         foreach ($_SERVER['argv'] as $argument) {

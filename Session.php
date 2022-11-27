@@ -4,30 +4,27 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
-use RuntimeException;
+use const PHP_SAPI;
 
 /**
  * Responsible for session work.
  */
-class Session
+abstract class Session
 {
     /**
      * Session data.
      */
-    private array $data = [];
+    protected array $data = [];
 
     /**
-     * Constructor.
+     * Create concrete session object.
+     *
+     * @return static
      */
-    public function __construct()
+    public static function factory(): static
     {
-        if (headers_sent()) {
-            throw new RuntimeException('Headers have already been sent');
-        }
-
-        session_start();
-
-        $this->data =& $_SESSION;
+        $className = (PHP_SAPI === 'cli') ? SessionConsole::class : SessionWeb::class;
+        return new $className();
     }
 
     /**

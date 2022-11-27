@@ -88,7 +88,7 @@ abstract class App implements AppInterface
     /**
      * Defining request params for console or web application.
      */
-    abstract protected function defineRequestParams(): void;
+    abstract public function defineRequestParams(): void;
 
     /**
      * Return controller name space accroding to app type (console|web) and PSR-4.
@@ -134,29 +134,28 @@ abstract class App implements AppInterface
      */
     public function run(): void
     {
-        $this->defineRequestParams();
+//        $this->defineRequestParams();
 
         try {
-            if ($this->isCleanUrlApply() && $this->route = $this->createRoute()) {
+//            if ($this->isCleanUrlApply() && $this->route = $this->createRoute()) {
+//
+//                foreach ($this->route as $param => $value) {
+//                    // $this->setRequestParam($param, $value);
+//                    // todo implement in child class web or console
+////                    if (PHP_SAPI === 'cli') {
+//////                        $this->setRequestParam($param, $value);
+////                        $this->setRequestGetParam($param, $value);
+////                    } else {
+////                        $this->setRequestGetParam($param, $value);
+////                    }
+//
+//
+//                    // Set param from route like GET param
+//                    $this->setRequestGetParam($param, $value);
+//                }
+//            }
 
-                foreach ($this->route as $param => $value) {
-                    // $this->setRequestParam($param, $value);
-                    // todo implement in child class web or console
-//                    if (PHP_SAPI === 'cli') {
-////                        $this->setRequestParam($param, $value);
-//                        $this->setRequestGetParam($param, $value);
-//                    } else {
-//                        $this->setRequestGetParam($param, $value);
-//                    }
-
-
-                    // Set param from route like GET param
-                    $this->setRequestGetParam($param, $value);
-                }
-
-
-            }
-
+            // This part bottom should be moved from this method
             $this->defineControllerNameSpace();
 
             //$this->setModuleName($this->getRequestModuleName());
