@@ -18,8 +18,8 @@ use PDO;
 class PdoRecord implements TableRecord
 {
     // todo what formats existing?
-    protected const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
-    protected const DATE_FORMAT = 'Y-m-d';
+//    protected const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
+//    protected const DATE_FORMAT = 'Y-m-d';
 
     protected static ?string $dsn = null;
 //    protected static ?PDO $pdo = null;
