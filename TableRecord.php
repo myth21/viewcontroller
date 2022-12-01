@@ -28,7 +28,7 @@ interface TableRecord
     /**
      * Return primary key of model to find unambiguous table row.
      *
-     * @return int|string|float (real for sqlite)
+     * @return int|float|string (real for sqlite)
      */
     public function getPrimaryKey();
 }

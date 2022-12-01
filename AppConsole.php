@@ -12,8 +12,9 @@ class AppConsole extends App
     /**
      * Define console params.
      * Signature of console parameters definition: key1=val1
+     * Note that console params are named as requestGetParams for common interface.
      */
-    protected function defineRequestParams(): void
+    protected function defineRequestParams() : void
     {
         $params = [];
         foreach ($_SERVER['argv'] as $argument) {
@@ -25,7 +26,7 @@ class AppConsole extends App
             }
         }
 
-        $this->requestGetParams = $params; // rename as requestParams or console params
+        $this->requestGetParams = $params;
     }
 
     /**

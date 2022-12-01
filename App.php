@@ -8,10 +8,13 @@ use Throwable;
 use BadMethodCallException;
 
 use function array_key_first;
+use function date;
+use function file_put_contents;
 use function method_exists;
 use function print_r;
 use function ucfirst;
 
+use const PHP_EOL;
 use const PHP_SAPI;
 
 /**
@@ -107,13 +110,13 @@ abstract class App implements AppInterface
     abstract protected function runController();
 
     /**
-     * Constructor.
+     * Class constructor.
      *
      * @param array $params
      */
     public function __construct(protected array $params)
     {
-        // TODO getting vendor params only.
+
     }
 
     /**
@@ -133,35 +136,21 @@ abstract class App implements AppInterface
      */
     public function run(): void
     {
-        $this->defineRequestParams();
-
         try {
+            $this->defineRequestParams();
+
             if ($this->isCleanUrlApply() && $this->route = $this->createRoute()) {
-
                 foreach ($this->route as $param => $value) {
-                    // $this->setRequestParam($param, $value);
-                    // todo implement in child class web or console
-//                    if (PHP_SAPI === 'cli') {
-////                        $this->setRequestParam($param, $value);
-//                        $this->setRequestGetParam($param, $value);
-//                    } else {
-//                        $this->setRequestGetParam($param, $value);
-//                    }
-
-
-                    // Set param from route like GET param
+                    // Set param from route like GET param.
                     $this->setRequestGetParam($param, $value);
                 }
-
-
             }
 
             $this->defineControllerNameSpace();
 
-            //$this->setModuleName($this->getRequestModuleName());
-            //$this->setApiName($this->getRequestApiName());
             $this->setControllerName($this->getRequestControllerName());
             $this->setActionName($this->getRequestActionName());
+
             $this->defineControllerClassName();
 
             $this->checkActionAvailableToRun();
@@ -169,43 +158,46 @@ abstract class App implements AppInterface
             $out = $this->runController();
 
         } catch (Throwable $e) {
-//            echo '<pre>';
-//            print_r($e);
-//            echo '</pre>';
-//            echo '<pre>';
-//            print_r($this->params);
-//            echo '</pre>';
-//            exit;
-            $message = '['.date('Y-m-d H:i:s').']' . PHP_EOL;
-            $message .= $e->getMessage() . PHP_EOL;
-            $message .= $e->getFile() . ':' . $e->getLine() . PHP_EOL;
-            $message .= PHP_EOL;
-            $errorLogPath = $this->getParam('throwableLogFileName');
-            // is_writable($errorLogPath)
-            file_put_contents($errorLogPath, $message);
 
-            // clear previous buffer outputs
+            $this->writeLog($e);
+
+            // Clear previous buffer outputs.
             while (ob_get_level()) {
                 ob_end_clean();
             }
-            $this->addThrowable($e);
-            // Set handler controller on throwable error
 
-            //  $this->defineControllerNameSpace();
+            $this->addThrowable($e);
+
             if ($this->isRequestToApi()) {
-                $this->controllerNameSpace = $this->getParam('apiExceptionControllerNameSpace');
+                $this->defineControllerNameSpace($this->getParam('apiExceptionControllerNameSpace'));
             } else {
                 $this->defineControllerNameSpace();
             }
 
             $this->setControllerName($this->getParam('exceptionControllerName'));
             $this->setActionName($this->getParam('exceptionMethodName'));
+
             $this->defineControllerClassName();
 
             $out = $this->runController();
         }
 
         $this->out($out);
+    }
+
+    /**
+     * Write typical raw (without PSR, standard or like this) in log is specified in params.
+     *
+     * @param Throwable $e
+     */
+    protected function writeLog(Throwable $e): void
+    {
+        $message = '['.date('Y-m-d H:i:s').']' . PHP_EOL;
+        $message .= $e->getMessage() . PHP_EOL;
+        $message .= $e->getFile() . ':' . $e->getLine() . PHP_EOL;
+        $message .= PHP_EOL;
+        $errorLogPath = $this->getParam('throwableLogFileName');
+        file_put_contents($errorLogPath, $message);
     }
 
     /**
@@ -220,12 +212,6 @@ abstract class App implements AppInterface
         foreach ($this->params['routes'] as $route) {
             $this->router->map($route['method'], $route['urlPattern'], $route['func'], $route['name']);
         }
-
-        /*
-        foreach ($this->params['routes'] as $urlPattern => $handler) {
-            $this->router->map($handler['method'], $urlPattern, $handler['func'], $handler['name']);
-        }
-        */
 
         $match = $this->router->match();
 
@@ -248,6 +234,9 @@ abstract class App implements AppInterface
         return $this->route;
     }
 
+    /**
+     * Is API request accoding to the router.
+     */
     public function isRequestToApi(): bool
     {
         return array_key_first($this->route) === $this->getApiKey();
@@ -256,20 +245,25 @@ abstract class App implements AppInterface
     /**
      * Define controller name space.
      */
-    protected function defineControllerNameSpace(): void
+    protected function defineControllerNameSpace(string $controllerNameSpace = null): void
     {
-        if ($this->isRequestToApi()) {
-
-            $this->controllerNameSpace = $this->params['apiNameSpace'] . $this->route[$this->getApiKey()] . $this->params['apiControllerNameSpace'];
-
-        } elseif (array_key_first($this->route) === $this->getModuleKey()) {
-
-            $this->controllerNameSpace = $this->params['moduleNameSpace'] . $this->route[$this->getModuleKey()]  . $this->params['moduleControllerNameSpace'];
-
-        } else {
-
-            $this->controllerNameSpace = $this->getControllerNameSpace();
+        if ($controllerNameSpace) {
+            $this->controllerNameSpace = $controllerNameSpace;
+            return;
         }
+
+        if ($this->isRequestToApi()) {
+            $this->controllerNameSpace = $this->params['apiNameSpace'] . $this->route[$this->getApiKey()] . $this->params['apiControllerNameSpace'];
+            return;
+
+        }
+
+        if (array_key_first($this->route) === $this->getModuleKey()) {
+            $this->controllerNameSpace = $this->params['moduleNameSpace'] . $this->route[$this->getModuleKey()]  . $this->params['moduleControllerNameSpace'];
+            return;
+        }
+
+        $this->controllerNameSpace = $this->getControllerNameSpace();
     }
 
     /**
@@ -278,19 +272,7 @@ abstract class App implements AppInterface
     protected function defineControllerClassName(): void
     {
         $controllerName = $this->controllerName . ucfirst($this->getControllerKey());
-
-        // define name space
-        /*
-        if (!$doSearchInApp && $this->apiName) {
-            $controllerClassName = $this->params['apiNameSpace'] . $this->apiName . $this->params['apiControllerNameSpace'] . $controllerName;
-        } elseif (!$doSearchInApp && $this->moduleName) {
-            $controllerClassName = $this->params['moduleNameSpace'] . $this->moduleName . $this->params['moduleControllerNameSpace'] . $controllerName;
-        } else {
-            $controllerClassName = $this->getControllerNameSpace() . $controllerName;
-        }*/
-
         $controllerClassName = $this->controllerNameSpace . $controllerName;
-
         $this->setControllerClassName($controllerClassName);
     }
 
@@ -335,15 +317,6 @@ abstract class App implements AppInterface
     {
         return $this->params['isCleanUrlApply'];
     }
-
-    /**
-     * Set request param.
-     * @deprecated
-     */
-//    protected function setRequestParam(string $key, $value): void
-//    {
-//        $this->requestParams[$key] = $value;
-//    }
 
     /**
      * Set request param. It can be http or console param.
@@ -417,24 +390,6 @@ abstract class App implements AppInterface
     }
 
     /**
-     * Return request params.
-     * @deprecated
-     */
-//    public function getRequestParams(): array
-//    {
-//        return $this->requestParams;
-//    }
-
-    /**
-     * Return request param by key.
-     * @deprecated
-     */
-//    public function getRequestParam(string $name): ?string
-//    {
-//        return $this->requestParams[$name] ?? null;
-//    }
-
-    /**
      * Return request param by key.
      */
     public function getRequestGetParam(string $name): ?string
@@ -465,9 +420,6 @@ abstract class App implements AppInterface
     {
         return $this->requestPostParams;
     }
-
-
-    // TODO need to manage Throwables?
 
     /**
      * Add throwable object in chain.
@@ -507,49 +459,13 @@ abstract class App implements AppInterface
         return $this->throwableChain;
     }
 
-
-    // TODO need to manage api and module getting names?
-
-    /**
-     * Set entity (model) name of an API.
-     */
-//    protected function setApiName(string $name = null): void
-//    {
-//        $this->apiName = $name;
-//    }
-
-    /**
-     * Set entity (model) name of a module.
-     */
-    protected function setModuleName(string $name = null): void
-    {
-        $this->moduleName = $name;
-    }
-
-    /**
-     * Return module.
-     */
-    public function getModule(): ?object
-    {
-        $modules = $this->getParam('modules');
-        return $modules[$this->moduleName] ?? null;
-    }
-
     /**
      * Return API.
      */
     public function getApi(): ?object
     {
-        $api = $this->getParam('api');
+        $api = $this->getParam($this->getApiKey());
         return $api[$this->apiName] ?? null;
-    }
-
-    /**
-     * Return module name.
-     */
-    public function getRequestModuleName(): ?string
-    {
-        return $this->requestGetParams[$this->getModuleKey()] ?? null;
     }
 
     /**
@@ -559,5 +475,30 @@ abstract class App implements AppInterface
     {
         return $this->requestGetParams[$this->getApiKey()] ?? null;
     }
+
+    /**
+     * Set entity (model) name of a module.
+     */
+//    protected function setModuleName(string $name = null): void
+//    {
+//        $this->moduleName = $name;
+//    }
+
+    /**
+     * Return module.
+     */
+//    public function getModule(): ?object
+//    {
+//        $modules = $this->getParam('modules');
+//        return $modules[$this->moduleName] ?? null;
+//    }
+
+    /**
+     * Return module name.
+     */
+//    public function getRequestModuleName(): ?string
+//    {
+//        return $this->requestGetParams[$this->getModuleKey()] ?? null;
+//    }
 
 }
