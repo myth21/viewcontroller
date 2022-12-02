@@ -12,7 +12,7 @@ abstract class WebController extends Controller
     /**
      * Web app object.
      */
-    protected AppWeb $app;
+    protected AbstractAppWeb $app;
 
     /**
      * Response header object.

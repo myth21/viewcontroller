@@ -9,19 +9,19 @@ namespace myth21\viewcontroller;
  */
 abstract class Controller
 {
-    use UrlQueryManager;
+    use UrlQueryManagerTrait;
 
     /**
      * View file manager.
      */
-    protected ?View $view = null;
+    protected ?ViewInterface $view = null;
 
     /**
      * Controller constructor.
      *
-     * @param App|null $app
+     * @param AbstractApp|null $app
      */
-    public function __construct(App $app = null)
+    public function __construct(AbstractApp $app = null)
     {
         $this->app = $app;
         $this->init();
@@ -44,16 +44,16 @@ abstract class Controller
      *
      * @return View
      */
-    public function createView(string $absolutePathToTemplateDir, string $templateFileName = null): View
-    {
-        $this->view = new View();
-
-        $this->view->setAbsoluteTemplateDirName($absolutePathToTemplateDir);
-
-        $templateFileName = $templateFileName ?? $this->app->getParam('defaultTemplateFileName');
-        $this->view->setTemplateFileName($templateFileName);
-
-        return $this->view;
-    }
+//    public function createView(string $absolutePathToTemplateDir, string $templateFileName = null): View
+//    {
+//        $this->view = new View();
+//
+//        $this->view->setAbsoluteTemplateDirName($absolutePathToTemplateDir);
+//
+//        $templateFileName = $templateFileName ?? $this->app->getParam('defaultTemplateFileName');
+//        $this->view->setTemplateFileName($templateFileName);
+//
+//        return $this->view;
+//    }
 
 }

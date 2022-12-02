@@ -1,7 +1,7 @@
 A simple MVC library written PHP
 =
-The app defines controller and action to run.
-View and PdoRecord classes for helping.
+The app class defines controller and action to run.
+View and PdoRecord classes are for helping.
 
 Requirements
 -

@@ -7,7 +7,7 @@ namespace myth21\viewcontroller;
 /**
  * Provide methods for working with url query string (use "dirty" url).
  */
-trait UrlQueryManager
+trait UrlQueryManagerTrait
 {
     /**
      * Return module key name.

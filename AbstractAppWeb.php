@@ -11,7 +11,7 @@ use const PHP_URL_PATH;
 /**
  * Responsible for web work.
  */
-class AppWeb extends App
+class AbstractAppWeb extends AbstractApp
 {
     protected const HEAD_REQUEST_METHOD = 'HEAD';
     protected const GET_REQUEST_METHOD = 'GET';
@@ -77,9 +77,9 @@ class AppWeb extends App
         $this->requestUriPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $this->isAjaxRequest = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
 
-        if ($this->isCleanUrlApply() && $this->route = $this->createRoute()) {
+        if ($this->isCleanUrlApply() && $this->routes = $this->createRoutes()) {
 
-            foreach ($this->route as $param => $value) {
+            foreach ($this->routes as $param => $value) {
                 // $this->setRequestParam($param, $value);
                 // todo implement in child class web or console
 //                    if (PHP_SAPI === 'cli') {
