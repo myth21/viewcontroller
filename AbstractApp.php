@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
+use RuntimeException;
 use Throwable;
 use BadMethodCallException;
 
 use function array_key_first;
+use function date;
+use function file_put_contents;
+use function is_callable;
 use function method_exists;
 use function print_r;
 use function ucfirst;
 
+use const PHP_EOL;
 use const PHP_SAPI;
 
 /**
@@ -121,11 +126,11 @@ abstract class AbstractApp implements AppInterface
      * If testing then how create AppWeb?
      *
      * @param array $params
-     * @return AbstractAppConsole|AbstractAppWeb
+     * @return ConsoleApp|WebApp
      */
-    public static function factory(array $params): AbstractAppConsole|AbstractAppWeb
+    public static function factory(array $params): ConsoleApp|WebApp
     {
-        $className = (PHP_SAPI === 'cli') ? AbstractAppConsole::class : AbstractAppWeb::class;
+        $className = (PHP_SAPI === 'cli') ? ConsoleApp::class : WebApp::class;
         return new $className($params);
     }
 
@@ -134,7 +139,6 @@ abstract class AbstractApp implements AppInterface
      */
     public function run(): void
     {
-        // todo change call this method from index.php
         $this->defineRequestParams();
 
         try {
@@ -170,20 +174,16 @@ abstract class AbstractApp implements AppInterface
             $out = $this->runController();
 
         } catch (Throwable $e) {
-//            echo '<pre>';
-//            print_r($e);
-//            echo '</pre>';
-//            echo '<pre>';
-//            print_r($this->params);
-//            echo '</pre>';
-//            exit;
-            $message = '['.date('Y-m-d H:i:s').']' . PHP_EOL;
-            $message .= $e->getMessage() . PHP_EOL;
-            $message .= $e->getFile() . ':' . $e->getLine() . PHP_EOL;
-            $message .= PHP_EOL;
-            $errorLogPath = $this->getParam('throwableLogFileName');
-            // is_writable($errorLogPath)
-            file_put_contents($errorLogPath, $message);
+
+//            $message = '['.date('Y-m-d H:i:s').']' . PHP_EOL;
+//            $message .= $e->getMessage() . PHP_EOL;
+//            $message .= $e->getFile() . ':' . $e->getLine() . PHP_EOL;
+//            $message .= PHP_EOL;
+//            $errorLogPath = $this->getParam('throwableLogger');
+//            // is_writable($errorLogPath)
+//            file_put_contents($errorLogPath, $message);
+
+            $this->writeLog($e);
 
             // clear previous buffer outputs
             while (ob_get_level()) {
@@ -207,6 +207,31 @@ abstract class AbstractApp implements AppInterface
         }
 
         $this->out($out);
+    }
+
+    public function writeLog(Throwable $e): void
+    {
+        $throwableLogger = $this->getParam(AppParamInterface::CALLABLE_LOGGER);
+
+        if (null === $throwableLogger) {
+            return;
+        }
+
+        if (!is_callable($throwableLogger)) {
+            throw new RuntimeException('callableLogger is not callable');
+        }
+
+        $throwableLogger($e);
+
+        /*
+        $message = '['.date('Y-m-d H:i:s').']' . PHP_EOL;
+        $message .= $e->getMessage() . PHP_EOL;
+        $message .= $e->getFile() . ':' . $e->getLine() . PHP_EOL;
+        $message .= PHP_EOL;
+        $errorLogPath = $this->getParam('throwableLogFileName');
+        // is_writable($errorLogPath)
+        file_put_contents($errorLogPath, $message);
+        */
     }
 
     /**

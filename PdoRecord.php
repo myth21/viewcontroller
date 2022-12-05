@@ -17,12 +17,7 @@ use PDO;
  */
 class PdoRecord implements TableRecord
 {
-    // todo what formats existing?
-//    protected const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
-//    protected const DATE_FORMAT = 'Y-m-d';
-
     protected static ?string $dsn = null;
-//    protected static ?PDO $pdo = null;
     protected static PDO $pdo;
     protected ?PDOStatement $pdoStatement = null;
     protected static string $primaryKeyName = 'id';
@@ -81,44 +76,37 @@ class PdoRecord implements TableRecord
         return $this->id;
     }
 
-    // TODO remove this method. This class must not do it.
-    public function init(array $data = []): void
-    {
-        foreach ($data as $key => $value) {
-            if (in_array($key, $this->getAttributes())) {
-                // it should remain NULL if class attribute value by default null
-                // It means that attributes in not initialed and input is empty
-                // TODO via isset($data[$key])?
-                if (empty($data[$key]) && is_null($this->{$key})) {
-                    continue;
-                }
-                $this->{$key} = $value;
-            }
-        }
-    }
 
-    protected function beforeInsert(){}
+    /**
+     * Run before inserting.
+     */
+    protected function beforeInsert(): void
+    {
+
+    }
 
     /**
      * Run before updating.
      */
-    protected function beforeUpdate()
+    protected function beforeUpdate(): void
     {
         // Disabled foreign key default.
+        // TODO check and delete
         static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
     }
 
     /**
      * Run before deleting.
      */
-    protected function beforeDelete()
+    protected function beforeDelete(): void
     {
         // Disabled foreign key default.
+        // TODO check and delete
         static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
     }
 
     /**
-     * Return subclass available attributes, associative arraay.
+     * Return subclass available attributes, associative array.
      */
     public static function getAvailableAttributes(): array
     {
@@ -127,6 +115,9 @@ class PdoRecord implements TableRecord
 
     /**
      * Return attribute label.
+     *
+     * @param string $attr
+     * @return string
      */
     public static function getLabel(string $attr): string
     {
@@ -467,6 +458,8 @@ class PdoRecord implements TableRecord
 
     /**
      * Return formatted values for deleting, like 1,2,...
+     *
+     * @param array $ids
      */
     private static function getDeletingIdsString(array $ids): string
     {

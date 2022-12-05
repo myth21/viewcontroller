@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller\tests;
 
-use myth21\viewcontroller\Session;
+use myth21\viewcontroller\AbstractSession;
 use PHPUnit\Framework\TestCase;
 
 class SessionTest extends TestCase
 {
     public function testSetHasGetDelete(): void
     {
-        $session = Session::factory();
+        $session = AbstractSession::factory();
 
         $session->set('key', 'value');
 

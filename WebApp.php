@@ -11,7 +11,7 @@ use const PHP_URL_PATH;
 /**
  * Responsible for web work.
  */
-class AbstractAppWeb extends AbstractApp
+class WebApp extends AbstractApp
 {
     protected const HEAD_REQUEST_METHOD = 'HEAD';
     protected const GET_REQUEST_METHOD = 'GET';
@@ -45,7 +45,7 @@ class AbstractAppWeb extends AbstractApp
     /***
      * Server session object.
      */
-    protected Session $session;
+    protected AbstractSession $session;
 
     /**
      * Response header object.
@@ -61,8 +61,7 @@ class AbstractAppWeb extends AbstractApp
     {
         parent::__construct($params);
 
-//        $this->session = new Session();
-        $this->session = Session::factory();
+        $this->session = AbstractSession::factory();
     }
 
     /**
@@ -80,17 +79,7 @@ class AbstractAppWeb extends AbstractApp
         if ($this->isCleanUrlApply() && $this->routes = $this->createRoutes()) {
 
             foreach ($this->routes as $param => $value) {
-                // $this->setRequestParam($param, $value);
-                // todo implement in child class web or console
-//                    if (PHP_SAPI === 'cli') {
-////                        $this->setRequestParam($param, $value);
-//                        $this->setRequestGetParam($param, $value);
-//                    } else {
-//                        $this->setRequestGetParam($param, $value);
-//                    }
-
-
-                // Set param from route like GET param
+                // Set param from route like GET param.
                 $this->setRequestGetParam($param, $value);
             }
         }
@@ -144,9 +133,9 @@ class AbstractAppWeb extends AbstractApp
     }
 
     /**
-     * @return Session
+     * @return AbstractSession
      */
-    public function getSession(): Session
+    public function getSession(): AbstractSession
     {
         return $this->session;
     }

@@ -7,10 +7,10 @@ namespace myth21\viewcontroller;
 /**
  * Responsible for console app controller.
  */
-abstract class ConsoleController extends Controller
+abstract class ConsoleController extends AbstractController
 {
     /**
      * Console app object.
      */
-    protected ?AbstractAppConsole $app;
+    protected ?ConsoleApp $app;
 }

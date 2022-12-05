@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use myth21\viewcontroller\AbstractAppWeb;
+use myth21\viewcontroller\WebApp;
 
 require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
 $params = require 'web-constants.php';
 
-$app = new AbstractAppWeb([
+$app = new WebApp([
     'isCleanUrlApply' => true, // https://en.wikipedia.org/wiki/Clean_URL
     'routes' => [
         ROUTE_HOME,

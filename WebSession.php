@@ -9,7 +9,7 @@ use RuntimeException;
 /**
  * Responsible for session work in web environment.
  */
-class SessionWeb extends Session
+class WebSession extends AbstractSession
 {
     /**
      * Constructor.

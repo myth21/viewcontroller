@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
+use Exception;
 use RuntimeException;
 
 use function is_readable;
@@ -50,7 +51,7 @@ class View implements ViewInterface
     /**
      * Presenter for implement view logic.
      */
-    protected ?PresenterInterface $presenter;
+//    protected ?PresenterInterface $presenter;
 
     /**
      * Return file content without template.
@@ -126,18 +127,18 @@ class View implements ViewInterface
     /**
      * Set presenter.
      */
-    public function setPresenter(PresenterInterface $viewModel): void
-    {
-        $this->presenter = $viewModel;
-    }
+//    public function setPresenter(PresenterInterface $viewModel): void
+//    {
+//        $this->presenter = $viewModel;
+//    }
 
     /**
      * Return presenter.
      */
-    public function getPresenter(): PresenterInterface
-    {
-        return $this->presenter;
-    }
+//    public function getPresenter(): PresenterInterface
+//    {
+//        return $this->presenter;
+//    }
 
     /**
      * Set router.
@@ -155,7 +156,7 @@ class View implements ViewInterface
      * @param string $routeName
      * @param array $params
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function createRoute(string $routeName, array $params = []): string
     {

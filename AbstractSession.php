@@ -9,7 +9,7 @@ use const PHP_SAPI;
 /**
  * Responsible for session work.
  */
-abstract class Session
+abstract class AbstractSession
 {
     /**
      * Session data.
@@ -23,7 +23,7 @@ abstract class Session
      */
     public static function factory(): static
     {
-        $className = (PHP_SAPI === 'cli') ? SessionConsole::class : SessionWeb::class;
+        $className = (PHP_SAPI === 'cli') ? ConsoleSession::class : WebSession::class;
         return new $className();
     }
 

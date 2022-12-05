@@ -7,7 +7,7 @@ namespace myth21\viewcontroller;
 /**
  * Responsible for session work in cli.
  */
-class SessionConsole extends Session
+class ConsoleSession extends AbstractSession
 {
     /**
      * Constructor.

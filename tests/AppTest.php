@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace myth21\viewcontroller\tests;
 
 use myth21\viewcontroller\AbstractApp;
-use myth21\viewcontroller\AbstractAppWeb;
+use myth21\viewcontroller\WebApp;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionProperty;
@@ -16,19 +16,19 @@ class AppTest extends TestCase
 {
     public function testIsCleanUrlApply(): void
     {
-        $app = new AbstractAppWeb([]);
+        $app = new WebApp([]);
         $this->assertFalse($app->isCleanUrlApply());
 
-        $app = new AbstractAppWeb(['isCleanUrlApply' => false]);
+        $app = new WebApp(['isCleanUrlApply' => false]);
         $this->assertFalse($app->isCleanUrlApply());
 
-        $app = new AbstractAppWeb(['isCleanUrlApply' => true]);
+        $app = new WebApp(['isCleanUrlApply' => true]);
         $this->assertTrue($app->isCleanUrlApply());
     }
 
     public function testRequestGetParam(): void
     {
-        $app = new AbstractAppWeb([]);
+        $app = new WebApp([]);
 
         $reflectionClass = new ReflectionClass($app);
 
@@ -56,7 +56,7 @@ class AppTest extends TestCase
             },
         ];
 
-        $app = new AbstractAppWeb([
+        $app = new WebApp([
             'api' => $apis
         ]);
 
@@ -87,7 +87,7 @@ class AppTest extends TestCase
             },
         ];
 
-        $app = new AbstractAppWeb([
+        $app = new WebApp([
             'modules' => $modules
         ]);
 
@@ -105,7 +105,7 @@ class AppTest extends TestCase
 
     public function testThrowableChain(): void
     {
-        $app = new AbstractAppWeb([]);
+        $app = new WebApp([]);
 
         $reflectionClass = new ReflectionClass($app);
         $method = $reflectionClass->getMethod('addThrowable');
@@ -133,7 +133,7 @@ class AppTest extends TestCase
 
         $expectedControllerClassName = '\\app\\controller\\IndexController';
 
-        $app = new AbstractAppWeb([
+        $app = new WebApp([
             'webControllerNameSpace' => $controllerNameSpace,
             'defaultControllerName' => $defaultControllerName,
             'defaultActionName' => $defaultActionName,

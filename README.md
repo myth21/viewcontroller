@@ -1,4 +1,4 @@
-A simple MVC library written PHP
+A simple MVC library written PHP, jerboa.
 =
 The app class defines controller and action to run.
 View and PdoRecord classes are for helping.

@@ -6,15 +6,11 @@ namespace myth21\viewcontroller\tests\web;
 
 use myth21\viewcontroller\AltoRouter;
 use PHPUnit\Framework\TestCase;
-
 use ReflectionFunction;
-
-use function print_r;
 
 use const GET_PARAM_ACTION;
 use const GET_PARAM_CONTROLLER;
 use const GET_PARAM_ID_STR;
-use const PHP_EOL;
 use const REQUEST_ACTION_NAME;
 use const REQUEST_CONTROLLER_NAME;
 use const REQUEST_GET_PARAMS;
@@ -22,7 +18,6 @@ use const ROUTE_CONTROLLER_INDEX;
 use const ROUTE_CONTROLLER_LIST;
 use const ROUTE_CONTROLLER_PAGE_SLUG;
 use const ROUTE_HOME;
-use const ROUTE_SITE_MAP;
 
 class WebClientTest extends TestCase
 {
