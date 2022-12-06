@@ -14,7 +14,7 @@ class ConsoleApp extends AbstractApp
      * Signature of console parameters definition: key1=val1
      * Note that console params are named as requestGetParams for common interface.
      */
-    protected function defineRequestParams() : void
+    public function defineRequestParams() : void
     {
         $params = [];
         foreach ($_SERVER['argv'] as $argument) {
