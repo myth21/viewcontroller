@@ -7,12 +7,17 @@ namespace myth21\viewcontroller;
 /**
  * Responsible for web app controller.
  */
-abstract class WebController extends Controller
+abstract class WebController extends AbstractController
 {
+    /**
+     * View file manager.
+     */
+    protected ?ViewInterface $view = null;
+
     /**
      * Web app object.
      */
-    protected AppWeb $app;
+    protected WebApp $app;
 
     /**
      * Response header object.
@@ -39,5 +44,36 @@ abstract class WebController extends Controller
     protected function redirectTo(string $url = null): void
     {
         $this->app->getResponseHeader()->redirect($url);
+    }
+
+    /**
+     * Create View.
+     * @deprecated ?
+     *
+     * @param string $absolutePathToTemplateDir
+     * @param string|null $templateFileName
+     *
+     * @return View
+     */
+    public function createView(string $absolutePathToTemplateDir, string $templateFileName = null): View
+    {
+        $this->view = new View();
+
+        $this->view->setAbsoluteTemplateDirName($absolutePathToTemplateDir);
+
+        $templateFileName = $templateFileName ?? $this->app->getParam('defaultTemplateFileName');
+        $this->view->setTemplateFileName($templateFileName);
+
+        return $this->view;
+    }
+
+    /**
+     * Set View.
+     *
+     * @param ViewInterface $view
+     */
+    public function setView(ViewInterface $view): void
+    {
+        $this->view = $view;
     }
 }

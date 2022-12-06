@@ -17,10 +17,6 @@ use PDO;
  */
 class PdoRecord implements TableRecord
 {
-    // todo what formats existing?
-//    protected const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
-//    protected const DATE_FORMAT = 'Y-m-d';
-
     protected static ?string $dsn = null;
     protected static PDO $pdo;
     protected ?PDOStatement $pdoStatement = null;
@@ -103,6 +99,7 @@ class PdoRecord implements TableRecord
     protected function beforeUpdate(): void
     {
         // Disabled foreign key default.
+        // TODO check and delete
         static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
     }
 
@@ -112,6 +109,7 @@ class PdoRecord implements TableRecord
     protected function beforeDelete(): void
     {
         // Disabled foreign key default.
+        // TODO check and delete
         static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
     }
 
@@ -439,6 +437,48 @@ class PdoRecord implements TableRecord
 
         return false;
     }
+
+//    /**
+//     * Delete record is related with current object (model).
+//     *
+//     * @return bool
+//     * @throws ReflectionException
+//     */
+//    public function delete(): bool
+//    {
+//        $this->beforeDelete();
+//
+//        $sql = 'DELETE FROM `'.static::getTableName().'` WHERE `'.static::$primaryKeyName.'`=:'.static::$primaryKeyName;
+//        $pdoStatement = self::$pdo->prepare($sql);
+//
+//        // Only variables should be passed by reference
+//        $primaryKey = $this->getPrimaryKey();
+//        $pdoStatement->bindParam(':'.static::$primaryKeyName, $primaryKey);
+//
+//        return $pdoStatement->execute();
+//    }
+//
+//    /**
+//     * Delete all records by ids.
+//     *
+//     * @param array $ids
+//     *
+//     * @return bool
+//     * @throws ReflectionException
+//     */
+//    public static function deleteAll(array $ids): bool
+//    {
+//        if (empty($ids)) {
+//            return false;
+//        }
+//
+//        $idsString = self::getDeletingIdsString($ids);
+//
+//        $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '` in (' . $idsString . ');';
+//        $pdoStatement = self::$pdo->prepare($sql);
+//
+//        return $pdoStatement->execute();
+//    }
 
     /**
      * Return formatted available attributes for inserting.

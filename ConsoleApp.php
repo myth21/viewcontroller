@@ -7,7 +7,7 @@ namespace myth21\viewcontroller;
 /**
  * Responsible for console work.
  */
-class AppConsole extends App
+class ConsoleApp extends AbstractApp
 {
     /**
      * Define console params.

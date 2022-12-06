@@ -11,7 +11,7 @@ use const PHP_URL_PATH;
 /**
  * Responsible for web work.
  */
-class AppWeb extends App
+class WebApp extends AbstractApp
 {
     protected const HEAD_REQUEST_METHOD = 'HEAD';
     protected const GET_REQUEST_METHOD = 'GET';
@@ -45,7 +45,7 @@ class AppWeb extends App
     /***
      * Server session object.
      */
-    protected Session $session;
+    protected AbstractSession $session;
 
     /**
      * Response header object.
@@ -61,13 +61,13 @@ class AppWeb extends App
     {
         parent::__construct($params);
 
-        $this->session = new Session();
+        $this->session = AbstractSession::factory();
     }
 
     /**
      * Init params from HTTP request and server.
      */
-    protected function defineRequestParams(): void
+    public function defineRequestParams(): void
     {
         $this->requestGetParams = $_GET;
         $this->requestPostParams = $_POST;
@@ -75,6 +75,14 @@ class AppWeb extends App
         $this->requestUri = $_SERVER['REQUEST_URI'];
         $this->requestUriPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $this->isAjaxRequest = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+
+        if ($this->isCleanUrlApply() && $this->routes = $this->createRoutes()) {
+
+            foreach ($this->routes as $param => $value) {
+                // Set param from route like GET param.
+                $this->setRequestGetParam($param, $value);
+            }
+        }
     }
 
     /**
@@ -125,9 +133,9 @@ class AppWeb extends App
     }
 
     /**
-     * @return Session
+     * @return AbstractSession
      */
-    public function getSession(): Session
+    public function getSession(): AbstractSession
     {
         return $this->session;
     }

@@ -6,8 +6,9 @@ namespace myth21\viewcontroller;
 
 /**
  * Provide methods for working with url query string (use "dirty" url).
+ * It can be used for redirect, build url, pull common url keys are to define route.
  */
-trait UrlQueryManager
+trait UrlQueryManagerTrait
 {
     /**
      * Return module key name.

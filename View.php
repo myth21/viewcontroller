@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
+use Exception;
 use RuntimeException;
 
 use function is_readable;
@@ -15,17 +16,17 @@ use const EXTR_OVERWRITE;
  */
 class View implements ViewInterface
 {
-    use UrlQueryManager;
+    use UrlQueryManagerTrait;
 
     /**
      * Absolute path to template dir name.
      */
-    protected ?string $absoluteTemplateDirName = null;
+    protected string $absoluteTemplateDirName;
 
     /**
      * Template file name.
      */
-    protected string $templateFileName = '';
+    protected string $templateFileName;
 
     /**
      * View title, is can be used for html title.
@@ -50,7 +51,7 @@ class View implements ViewInterface
     /**
      * Presenter for implement view logic.
      */
-    protected ?PresenterInterface $presenter;
+//    protected ?PresenterInterface $presenter;
 
     /**
      * Return file content without template.
@@ -126,21 +127,23 @@ class View implements ViewInterface
     /**
      * Set presenter.
      */
-    public function setPresenter(PresenterInterface $viewModel): void
-    {
-        $this->presenter = $viewModel;
-    }
+//    public function setPresenter(PresenterInterface $viewModel): void
+//    {
+//        $this->presenter = $viewModel;
+//    }
 
     /**
      * Return presenter.
      */
-    public function getPresenter(): PresenterInterface
-    {
-        return $this->presenter;
-    }
+//    public function getPresenter(): PresenterInterface
+//    {
+//        return $this->presenter;
+//    }
 
     /**
      * Set router.
+     *
+     * @param RouterInterface $router
      */
     public function setRouter(RouterInterface $router): void
     {
@@ -149,6 +152,11 @@ class View implements ViewInterface
 
     /**
      * Return generated url resource by router.
+     *
+     * @param string $routeName
+     * @param array $params
+     * @return string
+     * @throws Exception
      */
     public function createRoute(string $routeName, array $params = []): string
     {
@@ -157,6 +165,7 @@ class View implements ViewInterface
 
     /**
      * Set params in template file.
+     * @param array $params
      */
     public function setTemplateParams(array $params): void
     {
