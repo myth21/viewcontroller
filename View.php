@@ -49,11 +49,6 @@ class View implements ViewInterface
     protected ?RouterInterface $router;
 
     /**
-     * Presenter for implement view logic.
-     */
-//    protected ?PresenterInterface $presenter;
-
-    /**
      * Return file content without template.
      *
      * @param string $name
@@ -123,22 +118,6 @@ class View implements ViewInterface
 
         return ob_get_clean();
     }
-
-    /**
-     * Set presenter.
-     */
-//    public function setPresenter(PresenterInterface $viewModel): void
-//    {
-//        $this->presenter = $viewModel;
-//    }
-
-    /**
-     * Return presenter.
-     */
-//    public function getPresenter(): PresenterInterface
-//    {
-//        return $this->presenter;
-//    }
 
     /**
      * Set router.

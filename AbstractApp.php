@@ -9,14 +9,10 @@ use Throwable;
 use BadMethodCallException;
 
 use function array_key_first;
-use function date;
-use function file_put_contents;
 use function is_callable;
 use function method_exists;
-use function print_r;
 use function ucfirst;
 
-use const PHP_EOL;
 use const PHP_SAPI;
 
 /**
@@ -122,8 +118,7 @@ abstract class AbstractApp implements AppInterface
     }
 
     /**
-     * Create concrete app object.
-     * If testing then how create AppWeb?
+     * Create concrete app object depending on the environment.
      *
      * @param array $params
      * @return ConsoleApp|WebApp
@@ -142,25 +137,6 @@ abstract class AbstractApp implements AppInterface
         $this->defineRequestParams();
 
         try {
-//            if ($this->isCleanUrlApply() && $this->route = $this->createRoute()) {
-//
-//                foreach ($this->route as $param => $value) {
-//                    // $this->setRequestParam($param, $value);
-//                    // todo implement in child class web or console
-////                    if (PHP_SAPI === 'cli') {
-//////                        $this->setRequestParam($param, $value);
-////                        $this->setRequestGetParam($param, $value);
-////                    } else {
-////                        $this->setRequestGetParam($param, $value);
-////                    }
-//
-//
-//                    // Set param from route like GET param
-//                    $this->setRequestGetParam($param, $value);
-//                }
-//            }
-
-            // This part bottom should be moved from this method
             $this->defineControllerNameSpace();
 
             $this->setControllerName($this->getRequestControllerName());
@@ -213,16 +189,6 @@ abstract class AbstractApp implements AppInterface
         }
 
         $throwableLogger($e);
-
-        /*
-        $message = '['.date('Y-m-d H:i:s').']' . PHP_EOL;
-        $message .= $e->getMessage() . PHP_EOL;
-        $message .= $e->getFile() . ':' . $e->getLine() . PHP_EOL;
-        $message .= PHP_EOL;
-        $errorLogPath = $this->getParam('throwableLogFileName');
-        // is_writable($errorLogPath)
-        file_put_contents($errorLogPath, $message);
-        */
     }
 
     /**
@@ -241,14 +207,6 @@ abstract class AbstractApp implements AppInterface
             $this->router->map($route['method'], $route['urlPattern'], $route['func'], $route['name']);
         }
 
-//        $this->mapRoutes($this->params['routes']);
-
-        /*
-        foreach ($this->params['routes'] as $urlPattern => $handler) {
-            $this->router->map($handler['method'], $urlPattern, $handler['func'], $handler['name']);
-        }
-        */
-
         $match = $this->router->match();
 
         if (!$match) {
@@ -262,13 +220,6 @@ abstract class AbstractApp implements AppInterface
         return call_user_func_array($match['target'], $match['params']);
     }
 
-//    public function mapRoutes(array $routes): void
-//    {
-//        foreach ($routes as $route) {
-//            $this->router->map($route['method'], $route['urlPattern'], $route['func'], $route['name']);
-//        }
-//    }
-
     /**
      * Return route elements.
      */
@@ -278,7 +229,7 @@ abstract class AbstractApp implements AppInterface
     }
 
     /**
-     * Is API request accoding to the router.
+     * Is API request according to the router.
      */
     public function isRequestToApi(): bool
     {
@@ -323,19 +274,6 @@ abstract class AbstractApp implements AppInterface
      */
     protected function defineControllerClassName(): void
     {
-//        $controllerName = $this->controllerName . ucfirst($this->getControllerKey());
-
-        // define name space
-        /*
-        if (!$doSearchInApp && $this->apiName) {
-            $controllerClassName = $this->params['apiNameSpace'] . $this->apiName . $this->params['apiControllerNameSpace'] . $controllerName;
-        } elseif (!$doSearchInApp && $this->moduleName) {
-            $controllerClassName = $this->params['moduleNameSpace'] . $this->moduleName . $this->params['moduleControllerNameSpace'] . $controllerName;
-        } else {
-            $controllerClassName = $this->getControllerNameSpace() . $controllerName;
-        }*/
-
-//        $controllerClassName = $this->controllerNameSpace . $controllerName;
         $controllerClassName = $this->getControllerClassName();
 
         $this->setControllerClassName($controllerClassName);
@@ -404,18 +342,11 @@ abstract class AbstractApp implements AppInterface
     {
         $this->controllerClassName = $name;
     }
-//
-//    public function getControllerClassName()
-//    {
-//        return $this->controllerClassName;
-//    }
-//    public function getActionName()
-//    {
-//        return $this->actionName;
-//    }
 
     /**
      * Set controller name (e.g. Article) to create object for processing request.
+     *
+     * @param string $name
      */
     protected function setControllerName(string $name): void
     {
@@ -432,6 +363,7 @@ abstract class AbstractApp implements AppInterface
 
     /**
      * Set action name (e.g. view|list) of a controller.
+     * @param string $name
      */
     protected function setActionName(string $name): void
     {
@@ -448,6 +380,8 @@ abstract class AbstractApp implements AppInterface
 
     /**
      * Return config param by key.
+     *
+     * @param string $name
      * @return mixed
      */
     public function getParam(string $name): mixed
@@ -544,8 +478,6 @@ abstract class AbstractApp implements AppInterface
         $api = $this->getParam($this->getApiKey());
         return $api[$this->apiName] ?? null;
     }
-
-    // TODO need to manage api and module getting names?
 
     /**
      * Set entity (model) name of an API.

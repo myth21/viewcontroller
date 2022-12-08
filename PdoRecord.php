@@ -147,7 +147,6 @@ class PdoRecord implements TableRecord
      */
     public static function getNew(): static
     {
-        //$className = get_called_class();
         $className = static::class;
         return new $className();
     }
@@ -159,7 +158,6 @@ class PdoRecord implements TableRecord
      */
     public static function getTableName(): string
     {
-        //$className = get_called_class();
         $className = static::class;
         $reflectionClass = new ReflectionClass($className);
         $shortName = $reflectionClass->getShortName();
@@ -185,10 +183,6 @@ class PdoRecord implements TableRecord
      */
     public static function getPrimary(float|int|string $primaryKey): static|null
     {
-//        if (is_null($primaryKey)) {
-//            return null;
-//        }
-
         $sql = 'SELECT * FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '`="' . $primaryKey . '"';
         $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement->setFetchMode(PDO::FETCH_CLASS, static::class);
@@ -406,8 +400,7 @@ class PdoRecord implements TableRecord
 
         if (static::$isSequenceObjectId) {
             // https://www.php.net/manual/ru/pdo.lastinsertid.php
-            // Returns the ID of the last inserted row, or the last value from a sequence object,
-            // depending on the underlying driver.
+            // Returns the ID of the last inserted row, or the last value from a sequence object, depending on the underlying driver.
             $this->{static::$primaryKeyName} = self::$pdo->lastInsertId();
         }
 
@@ -437,48 +430,6 @@ class PdoRecord implements TableRecord
 
         return false;
     }
-
-//    /**
-//     * Delete record is related with current object (model).
-//     *
-//     * @return bool
-//     * @throws ReflectionException
-//     */
-//    public function delete(): bool
-//    {
-//        $this->beforeDelete();
-//
-//        $sql = 'DELETE FROM `'.static::getTableName().'` WHERE `'.static::$primaryKeyName.'`=:'.static::$primaryKeyName;
-//        $pdoStatement = self::$pdo->prepare($sql);
-//
-//        // Only variables should be passed by reference
-//        $primaryKey = $this->getPrimaryKey();
-//        $pdoStatement->bindParam(':'.static::$primaryKeyName, $primaryKey);
-//
-//        return $pdoStatement->execute();
-//    }
-//
-//    /**
-//     * Delete all records by ids.
-//     *
-//     * @param array $ids
-//     *
-//     * @return bool
-//     * @throws ReflectionException
-//     */
-//    public static function deleteAll(array $ids): bool
-//    {
-//        if (empty($ids)) {
-//            return false;
-//        }
-//
-//        $idsString = self::getDeletingIdsString($ids);
-//
-//        $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '` in (' . $idsString . ');';
-//        $pdoStatement = self::$pdo->prepare($sql);
-//
-//        return $pdoStatement->execute();
-//    }
 
     /**
      * Return formatted available attributes for inserting.
@@ -552,7 +503,7 @@ class PdoRecord implements TableRecord
     {
         $idsString = '';
         foreach ($ids as $id) {
-            // if $id is int then it will be converted to string, if you would like to us integers then us other method
+            // if $id is int then it will be converted to string, if you would like to us integers then us other method.
             $idsString .= '"' . $id . '",';
         }
 
