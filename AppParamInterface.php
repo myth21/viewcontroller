@@ -75,6 +75,11 @@ interface AppParamInterface
     public const ROUTES = 'routes';
 
     /**
+     * Array of APIs.
+     */
+    public const API = 'api';
+
+    /**
      * Array of modules.
      */
     public const MODULES = 'modules';

@@ -183,11 +183,11 @@ class PdoRecord implements TableRecord
      * @return static|null
      * @throws ReflectionException
      */
-    public static function getPrimary(float|int|string|null $primaryKey): static|null
+    public static function getPrimary(float|int|string $primaryKey): static|null
     {
-        if (is_null($primaryKey)) {
-            return null;
-        }
+//        if (is_null($primaryKey)) {
+//            return null;
+//        }
 
         $sql = 'SELECT * FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '`="' . $primaryKey . '"';
         $pdoStatement = self::$pdo->prepare($sql);
