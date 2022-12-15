@@ -107,9 +107,9 @@ class WebApp extends AbstractApp
     /**
      * Send output content to requester.
      *
-     * @param string|int $out
+     * @param mixed $out
      */
-    protected function out(string|int $out): void
+    protected function out(mixed $out): void
     {
         $this->responseHeader->sendHeaders();
 
