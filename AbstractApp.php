@@ -8,6 +8,7 @@ use RuntimeException;
 use Throwable;
 use BadMethodCallException;
 
+use function array_key_exists;
 use function array_key_first;
 use function is_callable;
 use function method_exists;
@@ -30,11 +31,6 @@ abstract class AbstractApp implements AppInterface
      * RouterInterface responsible for routing.
      */
     private ?RouterInterface $router;
-
-    /**
-     * Module entity (model) name is specified in config params.
-     */
-    private ?string $moduleName = null;
 
     /**
      * API entity (model) name is specified in config params.
@@ -233,7 +229,7 @@ abstract class AbstractApp implements AppInterface
      */
     public function isRequestToApi(): bool
     {
-        return array_key_first($this->routes) === $this->getApiKey();
+        return array_key_exists($this->getApiVersionKey(), $this->routes) && array_key_exists($this->getApiKey(), $this->routes);
     }
 
     /**
@@ -247,12 +243,12 @@ abstract class AbstractApp implements AppInterface
         }
 
         if ($this->isRequestToApi()) {
-            $this->controllerNameSpace = $this->params['apiNameSpace'] . $this->routes[$this->getApiKey()] . $this->params['apiControllerNameSpace'];
-            return;
-        }
-
-        if (array_key_first($this->routes) === $this->getModuleKey()) {
-            $this->controllerNameSpace = $this->params['moduleNameSpace'] . $this->routes[$this->getModuleKey()]  . $this->params['moduleControllerNameSpace'];
+            // API is created by url identification, not via media, vdn... headers.
+            $apiNameSpace = $this->params['apiNameSpace'];
+            $apiVersion = $this->getRequestGetParam($this->getApiVersionKey());
+            $apiEntityName = $this->routes[$this->getApiKey()];
+            $apiControllerNameSpace = $this->params['apiControllerNameSpace'];
+            $this->controllerNameSpace = $apiNameSpace .  $apiEntityName . '\\' . $apiVersion . $apiControllerNameSpace;
             return;
         }
 
@@ -489,38 +485,10 @@ abstract class AbstractApp implements AppInterface
     }
 
     /**
-     * Set entity (model) name of a module.
-     *
-     * @param string $name
-     */
-    protected function setModuleName(string $name): void
-    {
-        $this->moduleName = $name;
-    }
-
-    /**
      * Return API entity (model) name.
      */
     public function getRequestApiName(): ?string
     {
         return $this->requestGetParams[$this->getApiKey()] ?? null;
     }
-
-    /**
-     * Return module.
-     */
-    public function getModule(): ?object
-    {
-        $modules = $this->getParam('modules');
-        return $modules[$this->moduleName] ?? null;
-    }
-
-    /**
-     * Return module name.
-     */
-    public function getRequestModuleName(): ?string
-    {
-        return $this->requestGetParams[$this->getModuleKey()] ?? null;
-    }
-
 }

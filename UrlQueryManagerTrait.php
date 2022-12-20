@@ -11,19 +11,19 @@ namespace myth21\viewcontroller;
 trait UrlQueryManagerTrait
 {
     /**
-     * Return module key name.
-     */
-    public function getModuleKey(): string
-    {
-        return 'module';
-    }
-
-    /**
      * Return api key name.
      */
     public function getApiKey(): string
     {
         return 'api';
+    }
+
+    /**
+     * Return api version key name.
+     */
+    public function getApiVersionKey(): string
+    {
+        return 'version';
     }
 
     /**

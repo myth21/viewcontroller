@@ -60,16 +60,6 @@ interface AppParamInterface
     public const API_EXCEPTION_CONTROLLER_NAMESPACE = 'apiExceptionControllerNameSpace';
 
     /**
-     * Namespace to find web modules dir (PSR-4).
-     */
-    public const MODULE_NAME_NAMESPACE = 'moduleNameSpace';
-
-    /**
-     * Namespace to find web module controller (PSR-4).
-     */
-    public const MODULE_CONTROLLER_NAMESPACE = 'moduleControllerNameSpace';
-
-    /**
      * Array of routes.
      */
     public const ROUTES = 'routes';
@@ -78,11 +68,6 @@ interface AppParamInterface
      * Array of APIs.
      */
     public const API = 'api';
-
-    /**
-     * Array of modules.
-     */
-    public const MODULES = 'modules';
 
     /**
      * Callable entity to write in log.

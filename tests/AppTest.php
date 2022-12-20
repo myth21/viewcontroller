@@ -73,36 +73,6 @@ class AppTest extends TestCase
         $this->assertTrue($reflectionClass->isAnonymous());
     }
 
-    public function testModule(): void
-    {
-        $moduleName = 'blog';
-
-        $modules = [
-            $moduleName => new class
-            {
-                public function getSomething(): string
-                {
-                    return __METHOD__;
-                }
-            },
-        ];
-
-        $app = new WebApp([
-            'modules' => $modules
-        ]);
-
-        $reflectionClass = new ReflectionClass($app);
-        $method = $reflectionClass->getMethod('setModuleName');
-        $method->setAccessible(true);
-        $method->invoke($app, $moduleName);
-
-        $module = $app->getModule();
-
-        $reflectionClass = new ReflectionClass($module);
-
-        $this->assertTrue($reflectionClass->isAnonymous());
-    }
-
     public function testThrowableChain(): void
     {
         $app = new WebApp([]);
