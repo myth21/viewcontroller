@@ -15,7 +15,7 @@ use PDO;
  * Class PdoRecord is PDO wrapper.
  * Note: class is tested for working with SQLite only.
  */
-class PdoRecord implements TableRecord
+class PdoRecord implements TableRecordInterface
 {
     protected static ?string $dsn = null;
     protected static PDO $pdo;
@@ -204,10 +204,13 @@ class PdoRecord implements TableRecord
      */
     public static function getList(array $params = []): array
     {
-        $where = isset($params['where']) ? ' WHERE ' . $params['where'] : '';
-        $order = isset($params['order']) ? ' ORDER BY ' . $params['order'] : '';
-        $group = isset($params['group']) ? ' GROUP BY ' . $params['group'] : '';
-        $limit = isset($params['limit']) ? ' LIMIT ' . $params['limit'] : '';
+        $where  = isset($params['where']) ? ' WHERE ' . $params['where'] : '';
+        $order  = isset($params['order']) ? ' ORDER BY ' . $params['order'] : '';
+        $group  = isset($params['group']) ? ' GROUP BY ' . $params['group'] : '';
+        $limit  = isset($params['limit']) ? ' LIMIT ' . $params['limit'] : '';
+        if ($limit) {
+            $limit .= isset($params['offset']) ? ' OFFSET ' . $params['offset'] : '';
+        }
         // TODO other operators...
 
         $sql = 'SELECT * FROM `' . static::getTableName() . '`' . $where . $group . $order . $limit;

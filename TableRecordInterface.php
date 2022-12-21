@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace myth21\viewcontroller;
 
 /**
- * Interface TableRecord
+ * Describe interface for working PDO wrapper.
  */
-interface TableRecord
+interface TableRecordInterface
 {
     /**
      * Return specified table name of entity or default on base the entity name (Order::class return `order` table name).
