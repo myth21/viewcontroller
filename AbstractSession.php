@@ -8,6 +8,7 @@ use const PHP_SAPI;
 
 /**
  * Responsible for session work.
+ * @deprecated
  */
 abstract class AbstractSession
 {
