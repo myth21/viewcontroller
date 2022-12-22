@@ -11,6 +11,8 @@ use PDOException;
 use PDOStatement;
 use PDO;
 
+use function print_r;
+
 /**
  * Class PdoRecord is PDO wrapper.
  * Note: class is tested for working with SQLite only.
@@ -212,7 +214,6 @@ class PdoRecord implements TableRecordInterface
             $limit .= isset($params['offset']) ? ' OFFSET ' . $params['offset'] : '';
         }
         // TODO other operators...
-
         $sql = 'SELECT * FROM `' . static::getTableName() . '`' . $where . $group . $order . $limit;
         $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement->setFetchMode(PDO::FETCH_CLASS, static::class);
@@ -350,7 +351,7 @@ class PdoRecord implements TableRecordInterface
             return false;
         }
 
-        $idsString = self::getDeletingIdsString($ids);
+        $idsString = self::getIdsForInCondtition($ids);
 
         $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '` in (' . $idsString . ');';
         $pdoStatement = self::$pdo->prepare($sql);
@@ -367,13 +368,13 @@ class PdoRecord implements TableRecordInterface
      * @return bool
      * @throws ReflectionException
      */
-    public static function deleteAllByField(string $field, array $ids): bool
+    public static function deleteAllWhereField(string $field, array $ids): bool
     {
         if (empty($ids)) {
             return false;
         }
 
-        $idsString = self::getDeletingIdsString($ids);
+        $idsString = self::getIdsForInCondtition($ids);
 
         $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . $field . '` in (' . $idsString . ');';
         $pdoStatement = self::$pdo->prepare($sql);
@@ -502,7 +503,7 @@ class PdoRecord implements TableRecordInterface
      *
      * @return string
      */
-    private static function getDeletingIdsString(array $ids): string
+    public static function getIdsForInCondtition(array $ids): string
     {
         $idsString = '';
         foreach ($ids as $id) {

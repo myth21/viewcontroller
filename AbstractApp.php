@@ -399,7 +399,7 @@ abstract class AbstractApp implements AppInterface
      * @param string $name
      * @return string|null
      */
-    public function getRequestGetParam(string $name): ?string
+    public function getRequestGetParam(string $name): null|string|array
     {
         return $this->requestGetParams[$name] ?? null;
     }
