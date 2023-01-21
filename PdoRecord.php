@@ -446,7 +446,7 @@ class PdoRecord implements TableRecordInterface
     {
         $out = '';
         foreach ($this->getAttributes() as $attr) {
-            $out .= $isAddBindSeparator ? ':' . $attr . ',' : $attr . ',';
+            $out .= $isAddBindSeparator ? ':' . $attr . ',' : '`' . $attr . '`,';
         }
         $out = substr($out, 0, -1);
 
@@ -476,7 +476,7 @@ class PdoRecord implements TableRecordInterface
     {
         $out = '';
         foreach ($this->getAttributes() as $attr) {
-            $out .= $attr . '=:' . $attr . ',';
+            $out .= '`' . $attr . '`' . '=:' . $attr . ',';
         }
 
         return substr($out, 0, -1);
