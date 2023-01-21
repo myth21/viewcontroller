@@ -100,9 +100,9 @@ class PdoRecord implements TableRecordInterface
      */
     protected function beforeUpdate(): void
     {
-        // Disabled foreign key default.
+        // Foreign key constraints is disabled by default in SQLite.
         // TODO check and delete
-        static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
+        //static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
     }
 
     /**
@@ -110,9 +110,9 @@ class PdoRecord implements TableRecordInterface
      */
     protected function beforeDelete(): void
     {
-        // Disabled foreign key default.
+        // Foreign key constraints is disabled by default in SQLite.
         // TODO check and delete
-        static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
+        //static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
     }
 
     /**
@@ -442,7 +442,7 @@ class PdoRecord implements TableRecordInterface
      *
      * @return string
      */
-    private function getInsertingAvailableAttributes(bool $isAddBindSeparator = false): string
+    protected function getInsertingAvailableAttributes(bool $isAddBindSeparator = false): string
     {
         $out = '';
         foreach ($this->getAttributes() as $attr) {
@@ -456,7 +456,7 @@ class PdoRecord implements TableRecordInterface
     /**
      * Return formatted available values for inserting.
      */
-    private function getInsertingAvailableValues(): array
+    protected function getInsertingAvailableValues(): array
     {
         $out = [];
         foreach ($this->getAttributes() as $attr) {
@@ -472,7 +472,7 @@ class PdoRecord implements TableRecordInterface
     /**
      * Return formatted available values for inserting, like title=:tile, ...
      */
-    private function getUpdatingAvailableValues(): string
+    protected function getUpdatingAvailableValues(): string
     {
         $out = '';
         foreach ($this->getAttributes() as $attr) {
@@ -485,7 +485,7 @@ class PdoRecord implements TableRecordInterface
     /**
      * Binds attributes and values.
      */
-    private function bindAvailableValues(): void
+    protected function bindAvailableValues(): void
     {
         foreach ($this->getAttributes() as $attr) {
             $value = $this->{$attr};
@@ -521,7 +521,7 @@ class PdoRecord implements TableRecordInterface
      *
      * @return string
      */
-    private static function getEscapeString(string $value): string
+    protected static function getEscapeString(string $value): string
     {
         // \SQLite3::escapeString($value); // hmm... it does not work as expect
         // TODO reliable escape method
