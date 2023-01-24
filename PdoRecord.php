@@ -80,7 +80,7 @@ class PdoRecord implements TableRecordInterface
     /**
      * Return value of primary table key.
      *
-     * @return int|float|string (real for sqlite)
+     * @return int|float|string|null (float is real for sqlite)
      */
     public function getPrimaryKey()
     {
@@ -433,6 +433,21 @@ class PdoRecord implements TableRecordInterface
         }
 
         return false;
+    }
+
+    /**
+     * Insert or update model record on depended on primary key of model.
+     *
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function save(): bool
+    {
+        if ($this->getPrimaryKey()) {
+            return $this->update();
+        }
+
+        return $this->insert();
     }
 
     /**
