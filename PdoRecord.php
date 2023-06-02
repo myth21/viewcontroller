@@ -12,6 +12,7 @@ use PDOStatement;
 use PDO;
 
 use function print_r;
+use function substr;
 
 /**
  * Class PdoRecord is PDO wrapper.
@@ -436,6 +437,24 @@ class PdoRecord implements TableRecordInterface
     }
 
     /**
+     * @param array{field: string, value: mixed} $data
+     */
+    public function updateFields(array $data, bool $isBeforeUpdate = true): bool
+    {
+        $isBeforeUpdate && $this->beforeUpdate();
+
+        $out = '';
+        foreach ($data as $attr => $value) {
+            $out .= $attr . '=:' . $value . ','; // string like title=:tile, ...
+        }
+        $updatingAvailableValues = substr($out, 0, -1);
+
+        // TODO
+
+        return false;
+    }
+
+    /**
      * Insert or update model record on depended on primary key of model.
      *
      * @return bool
@@ -514,6 +533,7 @@ class PdoRecord implements TableRecordInterface
     /**
      * Return formatted values for deleting, like 1,2,...
      *
+     * @deprecated
      * @param array $ids
      *
      * @return string
