@@ -47,27 +47,6 @@ abstract class WebController extends AbstractController
     }
 
     /**
-     * Create View.
-     * @deprecated ?
-     *
-     * @param string $absolutePathToTemplateDir
-     * @param string|null $templateFileName
-     *
-     * @return View
-     */
-    public function createView(string $absolutePathToTemplateDir, string $templateFileName = null): View
-    {
-        $this->view = new View();
-
-        $this->view->setAbsoluteTemplateDirName($absolutePathToTemplateDir);
-
-        $templateFileName = $templateFileName ?? $this->app->getParam('defaultTemplateFileName');
-        $this->view->setTemplateFileName($templateFileName);
-
-        return $this->view;
-    }
-
-    /**
      * Set View.
      *
      * @param ViewInterface $view
