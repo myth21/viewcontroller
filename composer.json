@@ -1,7 +1,7 @@
 {
     "name": "myth21/viewcontroller",
-    "description": "A mere example of an ViewController app written PHP",
-    "keywords": ["php", "simple", "mvc", "framework"],
+    "description": "A simple example of a library app to use MVC written in PHP",
+    "keywords": ["php", "mvc", "framework", "viewcontroller", "library", "microframework"],
     "homepage": "https://github.com/myth21/viewcontroller",
     "license": "MIT",
     "authors": [
@@ -12,12 +12,12 @@
     ],
     "require": {
         "ext-pdo": "*",
-        "ext-mbstring": "*",
-        "ext-dom": "*"
+        "ext-mbstring": "*"
     },
     "autoload": {
         "psr-4": {
-            "myth21\\viewcontroller\\": ""
+            "myth21\\viewcontroller\\": "src/",
+            "myth21\\viewcontroller\\tests\\": "tests/"
         }
     },
     "require-dev": {

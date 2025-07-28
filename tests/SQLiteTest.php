@@ -36,7 +36,7 @@ class SQLiteTest extends TestCase
     protected function getModel()
     {
         $model = new class extends PdoRecord {
-            protected $id = null;
+            protected string|int|null|float $id = null;
             protected ?string $project_name = null;
             public static function getAvailableAttributes(): array
             {
@@ -134,8 +134,9 @@ class SQLiteTest extends TestCase
 
         $this->assertTrue($model->insert());
 
-        $nextPrimaryKey = $model->getPrimaryKey();
-        $this->assertEquals(SQLiteTest::ID + 1, $nextPrimaryKey);
+        // Warning, primary key can be not integer
+        $nextPrimaryKey = (int)$model->getPrimaryKey();
+        $this->assertGreaterThan(SQLiteTest::ID, $nextPrimaryKey);
 
         $model->delete();
     }
@@ -158,15 +159,26 @@ class SQLiteTest extends TestCase
     public function testDelete(): void
     {
         $model = $this->getModel();
-
+        $model->setName('Temp Name');
+        $model->insert();
         $this->assertTrue($model->delete());
     }
 
     public function testDeleteAll(): void
     {
-        $model = $this->getModel();
-        $this->assertTrue($model::deleteAll([1, SQLiteTest::ID]));
+        $model1 = $this->getModel();
+        $model1->setName('Temp 1');
+        $model1->insert();
 
-        $this->assertCount(0, $model::getList());
+        $model2 = $this->getModel();
+        $model2->setName('Temp 2');
+        $model2->insert();
+
+        $primaryKeys = [$model1->getPrimaryKey(), $model2->getPrimaryKey()];
+        $this->assertTrue($model1::deleteAll($primaryKeys));
+
+        foreach ($primaryKeys as $id) {
+            $this->assertNull($model1::getPrimary($id));
+        }
     }
 }

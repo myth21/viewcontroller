@@ -5,24 +5,24 @@ declare(strict_types=1);
 namespace myth21\viewcontroller\tests;
 
 use myth21\viewcontroller\AbstractApp;
+use myth21\viewcontroller\AppParamInterface;
 use myth21\viewcontroller\WebApp;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionProperty;
-
 use function get_class;
 
-class AppTest extends TestCase
+class WebAppTest extends TestCase
 {
     public function testIsCleanUrlApply(): void
     {
         $app = new WebApp([]);
         $this->assertFalse($app->isCleanUrlApply());
 
-        $app = new WebApp(['isCleanUrlApply' => false]);
+        $app = new WebApp([AppParamInterface::IS_CLEAN_URL => false]);
         $this->assertFalse($app->isCleanUrlApply());
 
-        $app = new WebApp(['isCleanUrlApply' => true]);
+        $app = new WebApp([AppParamInterface::IS_CLEAN_URL => true]);
         $this->assertTrue($app->isCleanUrlApply());
     }
 
@@ -57,7 +57,7 @@ class AppTest extends TestCase
         ];
 
         $app = new WebApp([
-            'api' => $apis
+            AppParamInterface::API => $apis
         ]);
 
         $reflectionClass = new ReflectionClass($app);
@@ -104,9 +104,9 @@ class AppTest extends TestCase
         $expectedControllerClassName = '\\app\\controller\\IndexController';
 
         $app = new WebApp([
-            'webControllerNameSpace' => $controllerNameSpace,
-            'defaultControllerName' => $defaultControllerName,
-            'defaultActionName' => $defaultActionName,
+            AppParamInterface::WEB_CONTROLLER_NAMESPACE => $controllerNameSpace,
+            AppParamInterface::DEFAULT_CONTROLLER_NAME => $defaultControllerName,
+            AppParamInterface::DEFAULT_ACTION_NAME => $defaultActionName,
         ]);
 
         $reflectionClass = new ReflectionClass($app);

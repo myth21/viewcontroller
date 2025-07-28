@@ -4,24 +4,19 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
+use BadMethodCallException;
 use RuntimeException;
 use Throwable;
-use BadMethodCallException;
-
 use function array_key_exists;
 use function array_key_first;
 use function is_callable;
 use function method_exists;
 use function ucfirst;
-
 use const PHP_SAPI;
 
 /**
  * App must define request params, route, choose controller and action to run, pass self in app as dependency injection.
  * App must not know about db, view...
- *
- * @property Throwable[] $throwableChain
- * @property array $params Config params.
  */
 abstract class AbstractApp implements AppInterface
 {
@@ -30,7 +25,7 @@ abstract class AbstractApp implements AppInterface
     /**
      * RouterInterface responsible for routing.
      */
-    private ?RouterInterface $router;
+    private ?RouterInterface $router = null;
 
     /**
      * API entity (model) name is specified in config params.
@@ -40,17 +35,17 @@ abstract class AbstractApp implements AppInterface
     /**
      * Controller name without Controller word.
      */
-    private ?string $controllerName;
+    private ?string $controllerName = null;
 
     /**
      * Full controller class name for handling.
      */
-    private ?string $controllerClassName;
+    private ?string $controllerClassName = null;
 
     /**
      * Stack of throwable objects.
      */
-    private array $throwableChain;
+    private array $throwableChain = [];
 
     /**
      * Request GET params.
@@ -70,7 +65,7 @@ abstract class AbstractApp implements AppInterface
     /**
      * Namespace to handle request.
      */
-    protected string $controllerNameSpace;
+    protected ?string $controllerNameSpace = null;
 
     /**
      * Controller to handle request.
@@ -80,7 +75,12 @@ abstract class AbstractApp implements AppInterface
     /**
      * Action of a controller to handle request.
      */
-    protected string $actionName;
+    protected ?string $actionName = null;
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected array $params = [];
 
     /**
      * Defining request params for console or web application.
@@ -88,29 +88,29 @@ abstract class AbstractApp implements AppInterface
     abstract public function defineRequestParams(): void;
 
     /**
-     * Return controller name space accroding to app type (console|web) and PSR-4.
+     * Return controller name space according to app type (console|web) and PSR-4.
      */
     abstract protected function getControllerNameSpace(): string;
 
     /**
      * Output handled request result.
-     * @param string|int $out
+     * @param mixed $out
      */
-    abstract protected function out(string|int $out): void;
+    abstract protected function out(mixed $out): void;
 
     /**
      * Run a controller and return result of processing.
      */
-    abstract protected function runController();
+    abstract protected function runController(): mixed;
 
     /**
      * Class constructor.
      *
      * @param array $params
      */
-    public function __construct(protected array $params)
+    public function __construct(array $params)
     {
-
+        $this->params = array_replace_recursive(AppParamDefault::getParams(), $params);
     }
 
     /**
@@ -122,6 +122,7 @@ abstract class AbstractApp implements AppInterface
     public static function factory(array $params): ConsoleApp|WebApp
     {
         $className = (PHP_SAPI === 'cli') ? ConsoleApp::class : WebApp::class;
+
         return new $className($params);
     }
 
@@ -156,13 +157,13 @@ abstract class AbstractApp implements AppInterface
             $this->addThrowable($e);
 
             if ($this->isRequestToApi()) {
-                $this->defineControllerNameSpace($this->getParam('apiExceptionControllerNameSpace'));
+                $this->defineControllerNameSpace($this->getParam(AppParamInterface::API_EXCEPTION_CONTROLLER_NAMESPACE));
             } else {
                 $this->defineControllerNameSpace();
             }
 
-            $this->setControllerName($this->getParam('exceptionControllerName'));
-            $this->setActionName($this->getParam('exceptionMethodName'));
+            $this->setControllerName($this->getParam(AppParamInterface::EXCEPTION_CONTROLLER_NAME));
+            $this->setActionName($this->getParam(AppParamInterface::EXCEPTION_METHOD_NAME));
 
             $this->defineControllerClassName();
 
@@ -197,7 +198,7 @@ abstract class AbstractApp implements AppInterface
     {
         $this->router = new AltoRouter();
 
-        $routes = $this->params['routes'] ?: [];
+        $routes = $this->params[AppParamInterface::ROUTES] ?: [];
 
         foreach ($routes as $route) {
             $this->router->map($route['method'], $route['urlPattern'], $route['func'], $route['name']);
@@ -244,10 +245,10 @@ abstract class AbstractApp implements AppInterface
 
         if ($this->isRequestToApi()) {
             // API is created by url identification, not via media, vdn... headers.
-            $apiNameSpace = $this->params['apiNameSpace'];
+            $apiNameSpace = $this->params[AppParamInterface::API_NAME_NAMESPACE];
             $apiVersion = $this->getRequestGetParam($this->getApiVersionKey());
             $apiEntityName = $this->routes[$this->getApiKey()];
-            $apiControllerNameSpace = $this->params['apiControllerNameSpace'];
+            $apiControllerNameSpace = $this->params[AppParamInterface::API_CONTROLLER_NAMESPACE];
             $this->controllerNameSpace = $apiNameSpace .  $apiEntityName . '\\' . $apiVersion . $apiControllerNameSpace;
             return;
         }
@@ -282,8 +283,8 @@ abstract class AbstractApp implements AppInterface
      */
     protected function checkActionAvailableToRun(): void
     {
-        // Using this function will use any registered auto loaders if the class has not already been known
-        // It uses psr-4..
+        // Using this function will use any registered autoloaders if the class has not already been known.
+        // It uses psr-4.
         if (!method_exists($this->controllerClassName, $this->actionName)) {
             $message = 'Action ' . $this->controllerClassName . '::' . $this->actionName . ' is not available to run';
             throw new BadMethodCallException($message, 404);
@@ -314,7 +315,7 @@ abstract class AbstractApp implements AppInterface
      */
     public function isCleanUrlApply(): bool
     {
-        return $this->params['isCleanUrlApply'] ?? false;
+        return $this->params[AppParamInterface::IS_CLEAN_URL] ?? false;
     }
 
     /**
@@ -334,7 +335,7 @@ abstract class AbstractApp implements AppInterface
      *
      * @param string $name
      */
-    protected function setControllerClassName(string $name): void
+    private function setControllerClassName(string $name): void
     {
         $this->controllerClassName = $name;
     }
@@ -344,7 +345,7 @@ abstract class AbstractApp implements AppInterface
      *
      * @param string $name
      */
-    protected function setControllerName(string $name): void
+    private function setControllerName(string $name): void
     {
         $this->controllerName = $name;
     }
@@ -354,14 +355,14 @@ abstract class AbstractApp implements AppInterface
      */
     public function getRequestControllerName(): string
     {
-        return $this->requestGetParams[$this->getControllerKey()] ?? $this->getParam('defaultControllerName');
+        return $this->requestGetParams[$this->getControllerKey()] ?? $this->getParam(AppParamInterface::DEFAULT_CONTROLLER_NAME);
     }
 
     /**
      * Set action name (e.g. view|list) of a controller.
      * @param string $name
      */
-    protected function setActionName(string $name): void
+    private function setActionName(string $name): void
     {
         $this->actionName = $name;
     }
@@ -371,7 +372,7 @@ abstract class AbstractApp implements AppInterface
      */
     public function getRequestActionName(): string
     {
-        return $this->requestGetParams[$this->getActionKey()] ?? $this->getParam('defaultActionName');
+        return $this->requestGetParams[$this->getActionKey()] ?? $this->getParam(AppParamInterface::DEFAULT_ACTION_NAME);
     }
 
     /**
@@ -443,6 +444,10 @@ abstract class AbstractApp implements AppInterface
      */
     public function getFirstThrowable(): Throwable
     {
+        if ($this->throwableChain === []) {
+            throw new RuntimeException('Throwable chain is empty. No exceptions recorded.');
+        }
+
         $key = array_key_first($this->throwableChain);
 
         return $this->throwableChain[$key];
@@ -453,6 +458,10 @@ abstract class AbstractApp implements AppInterface
      */
     public function getLastThrowable(): Throwable
     {
+        if ($this->throwableChain === []) {
+            throw new RuntimeException('Throwable chain is empty. No exceptions recorded.');
+        }
+
         $key = array_key_last($this->throwableChain);
 
         return $this->throwableChain[$key];
@@ -472,6 +481,7 @@ abstract class AbstractApp implements AppInterface
     public function getApi(): ?object
     {
         $api = $this->getParam($this->getApiKey());
+
         return $api[$this->apiName] ?? null;
     }
 

@@ -1,2 +1,16 @@
-.idea
-vendor
+# IDE / Editor
+.idea/
+.vscode/
+
+# Dependency directories
+vendor/
+
+# Composer artifacts
+composer.lock
+
+# PHPUnit
+.phpunit.result.cache
+
+# OS junk
+.DS_Store
+Thumbs.db

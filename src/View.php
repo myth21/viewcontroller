@@ -6,15 +6,13 @@ namespace myth21\viewcontroller;
 
 use Exception;
 use RuntimeException;
-
 use function is_readable;
-
 use const EXTR_OVERWRITE;
 
 /**
  * Responsible for work with view files.
  */
-class View implements ViewInterface
+class View
 {
     use UrlQueryManagerTrait;
 
@@ -84,8 +82,15 @@ class View implements ViewInterface
     {
         $this->content = $this->renderPart($name, $data);
 
-        // Warning: variables will be replace in template from template part.
+        // Warning: variables will be replaced in template from template part.
         $viewFilePath = $this->absoluteTemplateDirName . $this->templateFileName . '.php';
+
+        // Filtering, delete vars like: '1invalid', 'GLOBALS', 'my-var'
+        foreach ($data as $key => $value) {
+            if (!preg_match('/^[a-zA-Z_]\w*$/', $key)) {
+                unset($data[$key]);
+            }
+        }
 
         ob_start();
         ob_implicit_flush(false);
@@ -225,7 +230,7 @@ class View implements ViewInterface
     }
 
     /**
-     * Return page, screen.. main content.
+     * Return page, screen... main content.
      */
     public function getContent(): string
     {

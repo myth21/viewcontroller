@@ -8,7 +8,6 @@ use const PHP_SAPI;
 
 /**
  * Responsible for session work.
- * @deprecated
  */
 abstract class AbstractSession
 {
@@ -74,6 +73,11 @@ abstract class AbstractSession
     public function delete(string $key): void
     {
         unset($this->data[$key]);
+    }
+
+    public function clear(): void
+    {
+        $this->data = [];
     }
 
     /**

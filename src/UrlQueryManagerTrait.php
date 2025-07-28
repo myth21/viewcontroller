@@ -15,7 +15,7 @@ trait UrlQueryManagerTrait
      */
     public function getApiKey(): string
     {
-        return 'api';
+        return AppParamInterface::API;
     }
 
     /**
@@ -23,7 +23,7 @@ trait UrlQueryManagerTrait
      */
     public function getApiVersionKey(): string
     {
-        return 'version';
+        return AppParamInterface::VERSION;
     }
 
     /**
@@ -31,7 +31,7 @@ trait UrlQueryManagerTrait
      */
     public function getControllerKey(): string
     {
-        return 'controller';
+        return AppParamInterface::CONTROLLER;
     }
 
     /**
@@ -39,7 +39,7 @@ trait UrlQueryManagerTrait
      */
     public function getActionKey(): string
     {
-        return 'action';
+        return AppParamInterface::ACTION;
     }
 
     /**

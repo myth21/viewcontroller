@@ -9,9 +9,6 @@ namespace myth21\viewcontroller;
  */
 class ConsoleSession extends AbstractSession
 {
-    /**
-     * Constructor.
-     */
     public function __construct()
     {
         $_SESSION = [];

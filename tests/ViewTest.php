@@ -2,15 +2,18 @@
 
 declare(strict_types=1);
 
-namespace myth21\viewcontroller\tests\views;
-
-use myth21\viewcontroller\View;
 use PHPUnit\Framework\TestCase;
-
-use const DIRECTORY_SEPARATOR;
+use myth21\viewcontroller\View;
 
 class ViewTest extends TestCase
 {
+    public function testSetAndGetParam(): void
+    {
+        $view = new View();
+        $view->setTemplateParam('title', 'Test');
+        $this->assertEquals('Test', $view->getTemplateParam('title'));
+    }
+
     public function testRendering()
     {
         $view = new View();
@@ -31,16 +34,5 @@ class ViewTest extends TestCase
 
         $render = $view->renderFile($pathToDir . 'view.php', ['key' => 'value']);
         $this->assertEquals('value', $render);
-    }
-
-    public function testOther()
-    {
-        $view = new View();
-
-        $view->setTitle('Title');
-        $this->assertEquals('Title', $view->getTitle());
-
-        $view->setTemplateParam('key', 'value');
-        $this->assertEquals('value', $view->getTemplateParam('key'));
     }
 }

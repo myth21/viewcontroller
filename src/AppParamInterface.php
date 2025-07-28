@@ -68,6 +68,9 @@ interface AppParamInterface
      * Array of APIs.
      */
     public const API = 'api';
+    public const VERSION = 'version';
+    public const CONTROLLER = 'controller';
+    public const ACTION = 'action';
 
     /**
      * Callable entity to write in log.

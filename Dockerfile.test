@@ -1,0 +1,23 @@
+# Dockerfile.test
+
+FROM php:8.2-cli
+
+# Install dependencies required for Composer and PHPUnit
+RUN apt-get update && apt-get install -y git unzip && rm -rf /var/lib/apt/lists/*
+
+# Copy Composer from the official image (preferred over downloading manually)
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+WORKDIR /app
+
+# Copy only Composer configuration files
+COPY composer.json composer.lock /app/
+
+# Install dependencies into /app/vendor
+RUN composer install --no-interaction --no-progress --prefer-dist
+
+# Copy application source code into the container
+COPY . /app
+
+# Default command is bash (you can run tests manually later)
+CMD ["bash"]

@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-namespace myth21\viewcontroller\tests;
-
 use myth21\viewcontroller\UrlQueryManagerTrait;
 use PHPUnit\Framework\TestCase;
 

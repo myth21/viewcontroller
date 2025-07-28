@@ -7,28 +7,22 @@ namespace myth21\viewcontroller;
 /**
  * Describe interface for working PDO wrapper.
  */
-interface TableRecordInterface
+interface PdoRecordInterface
 {
     /**
      * Return specified table name of entity or default on base the entity name (Order::class return `order` table name).
      * Using on late static bindings.
-     *
-     * @return string
      */
-    public static function getTableName();
+    public static function getTableName(): string;
 
     /**
      * Return array of available for init attributes.
      * Using on late static bindings.
-     *
-     * @return array
      */
-    public static function getAvailableAttributes();
+    public static function getAvailableAttributes(): array;
 
     /**
      * Return primary key of model to find unambiguous table row.
-     *
-     * @return int|float|string (real for sqlite)
      */
-    public function getPrimaryKey();
+    public function getPrimaryKey(): float|int|string|null;
 }

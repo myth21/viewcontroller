@@ -17,7 +17,8 @@ class ConsoleApp extends AbstractApp
     public function defineRequestParams() : void
     {
         $params = [];
-        foreach ($_SERVER['argv'] as $argument) {
+        $argv = $_SERVER['argv'] ?? [];
+        foreach ($argv as $argument) {
             $explodedValue = explode('=', $argument);
 
             if (count($explodedValue) === 2) {
@@ -34,13 +35,13 @@ class ConsoleApp extends AbstractApp
      */
     protected function getControllerNameSpace(): string
     {
-        return $this->getParam('consoleControllerNameSpace');
+        return $this->getParam(AppParamInterface::CONSOLE_CONTROLLER_NAMESPACE);
     }
 
     /**
      * Run console controller and return result of processing.
      */
-    protected function runController()
+    protected function runController(): string|int|null
     {
         $this->createController();
         return $this->controller->{$this->actionName}();
@@ -48,11 +49,10 @@ class ConsoleApp extends AbstractApp
 
     /**
      * Send output content to requester.
-     *
-     * @param string|int $out
      */
-    protected function out(string|int $out): void
+    protected function out(mixed $out): void
     {
-        exit($out);
+        print_r($out);
+        exit();
     }
 }

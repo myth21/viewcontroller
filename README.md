@@ -1,12 +1,49 @@
-A simple MVC library written PHP, jerboa.
+Myth21 ViewController.
 =
-The app class defines controller and action to run.
-View and PdoRecord classes are for helping.
+A simple MVC library written in PHP, jerboa style.
+Provides a minimal framework to define controllers and actions to run.
+Includes helper classes such as View for templating and PdoRecord for database record handling.
 
 Requirements
 -
-* PDO extension
-* PHP version 8.0 minimum
+- PHP 8.0 or higher
+- PDO PHP extension enabled
+
+Expected Project Structure Default (can be overridden)
+-
+This library expects the following directory and namespace layout based on your viewcontroller.php configuration:
+```
+project-root/
+│
+├── app/
+│   ├── controller/               ← Web controllers (e.g., IndexController)
+│   │   └── IndexController.php
+│   │
+│   └── api/                      ← API services and exception controllers
+│       ├── SomeApiService.php
+│       └── ExceptionController.php
+│
+├── admin/
+│   └── console/                  ← CLI (console) controllers
+│       └── SomeConsoleCommand.php
+│
+├── config/
+│   ├── viewcontroller.php        ← Configuration for the library
+│   ├── routes.php                ← Optional routing rules
+│   └── local_app.php             ← Local environment overrides
+│
+├── public/                       ← Public web root (optional)
+│   └── index.php                 ← Entry point for HTTP requests
+│
+├── storage/
+│   └── .error_log                ← Error logs written by the library
+│
+├── vendor/                       ← Composer dependencies
+│
+└── composer.json
+```
+
+
 
 Installation
 -
@@ -16,16 +53,24 @@ composer require myth21/viewcontroller
 ```
 Or download project and use how you want.
 
-App waiting for params
+App constructor is waiting for array of params specified in AppParamInterface
 -
 ```php
 <?php
-
-declare(strict_types=1);
+// For example, config/vendor/viewcontroller.php
 
 return [
-    // in progress
+    AppParamInterface::DEFAULT_CONTROLLER_NAME => 'Index',
+    AppParamInterface::DEFAULT_ACTION_NAME => 'index',
+    // ...
 ];
+```
+
+Testing
+-
+```
+docker build -t vc-test -f Dockerfile.test .
+docker run --rm -v $(pwd):/app -w /app vc-test composer install
 ```
 
 License

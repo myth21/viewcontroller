@@ -4,38 +4,35 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
-use ReflectionException;
-use RuntimeException;
-use ReflectionClass;
+use InvalidArgumentException;
+use PDO;
 use PDOException;
 use PDOStatement;
-use PDO;
-
-use function print_r;
-use function substr;
+use ReflectionClass;
+use ReflectionException;
+use RuntimeException;
 
 /**
  * Class PdoRecord is PDO wrapper.
  * Note: class is tested for working with SQLite only.
  */
-class PdoRecord implements TableRecordInterface
+class PdoRecord implements PdoRecordInterface
 {
-    protected static ?string $dsn = null;
-    protected static PDO $pdo;
     protected ?PDOStatement $pdoStatement = null;
+    protected static ?string $dsn = null;
     protected static string $primaryKeyName = 'id';
 
     /**
      * Default value of primary field.
-     *
-     * @var null|int|float|string
      */
-    protected $id = null;
+    protected null|int|float|string $id = null;
 
     /**
      * @link https://www.php.net/manual/en/pdo.lastinsertid.php
      */
     protected static bool $isSequenceObjectId = true;
+
+    protected static bool $htmlEncodeOutput = true;
 
     /**
      * Init this wrapper. Create PDO, set attributes and save link to him.
@@ -47,11 +44,14 @@ class PdoRecord implements TableRecordInterface
     public static function initPdo(string $dsn, array $pdoAttributes = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION], array $options = null): void
     {
         self::$dsn = $dsn;
-        self::$pdo = new PDO($dsn, $options);
+        //self::$pdo = new PDO($dsn, $options);
+        $pdo = new PDO($dsn, $options);
 
         foreach ($pdoAttributes as $attr => $param) {
-            self::$pdo->setAttribute($attr, $param);
+            $pdo->setAttribute($attr, $param);
         }
+
+        PdoRegistry::set($pdo);
     }
 
     /**
@@ -59,7 +59,8 @@ class PdoRecord implements TableRecordInterface
      */
     public static function getPdo(): ?PDO
     {
-        return self::$pdo;
+        return PdoRegistry::get();
+//        return self::$pdo;
     }
 
     /**
@@ -80,10 +81,8 @@ class PdoRecord implements TableRecordInterface
 
     /**
      * Return value of primary table key.
-     *
-     * @return int|float|string|null (float is real for sqlite)
      */
-    public function getPrimaryKey()
+    public function getPrimaryKey(): float|int|string|null
     {
         return $this->id;
     }
@@ -97,23 +96,43 @@ class PdoRecord implements TableRecordInterface
     }
 
     /**
-     * Run before updating.
+     * Hook method called before update.
+     *
+     * Note for SQLite users:
+     * SQLite supports foreign key constraints, but they are **disabled by default**
+     * in versions prior to 3.6.19 (released in October 2009). Even in newer versions,
+     * enforcement must be **explicitly enabled per connection** using:
+     *
+     *     PRAGMA foreign_keys = ON;
+     *
+     * If your application relies on foreign key constraints, make sure to enable them
+     * manually after opening the connection. This library does not manage this behavior.
+     *
+     * @see https://www.sqlite.org/foreignkeys.html
      */
     protected function beforeUpdate(): void
     {
-        // Foreign key constraints is disabled by default in SQLite.
-        // TODO check and delete
-        //static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
+        // Overridable by child classes
     }
 
     /**
-     * Run before deleting.
+     * Hook method called before delete.
+     *
+     * Note for SQLite users:
+     * SQLite supports foreign key constraints, but they are **disabled by default**
+     * in versions prior to 3.6.19 (released in October 2009). Even in newer versions,
+     * enforcement must be **explicitly enabled per connection** using:
+     *
+     *     PRAGMA foreign_keys = ON;
+     *
+     * If your application relies on foreign key constraints, make sure to enable them
+     * manually after opening the connection. This library does not manage this behavior.
+     *
+     * @see https://www.sqlite.org/foreignkeys.html
      */
     protected function beforeDelete(): void
     {
-        // Foreign key constraints is disabled by default in SQLite.
-        // TODO check and delete
-        //static::$pdo->prepare('PRAGMA foreign_keys = OFF;')->execute();
+        // Overridable by child classes
     }
 
     /**
@@ -186,8 +205,10 @@ class PdoRecord implements TableRecordInterface
      */
     public static function getPrimary(float|int|string $primaryKey): static|null
     {
-        $sql = 'SELECT * FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '`="' . $primaryKey . '"';
-        $pdoStatement = self::$pdo->prepare($sql);
+        $sql = 'SELECT * FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '` = :primaryKey';
+//        $pdoStatement = self::$pdo->prepare($sql);
+        $pdoStatement = static::getPdo()->prepare($sql);
+        $pdoStatement->bindValue(':primaryKey', $primaryKey);
         $pdoStatement->setFetchMode(PDO::FETCH_CLASS, static::class);
         $pdoStatement->execute();
 
@@ -207,16 +228,22 @@ class PdoRecord implements TableRecordInterface
      */
     public static function getList(array $params = []): array
     {
+        $fields = $params['fields'] ?? '*';
+
+        $join   = isset($params['join']) ? ' ' . $params['join'] : '';
         $where  = isset($params['where']) ? ' WHERE ' . $params['where'] : '';
         $order  = isset($params['order']) ? ' ORDER BY ' . $params['order'] : '';
         $group  = isset($params['group']) ? ' GROUP BY ' . $params['group'] : '';
+        $having = isset($params['having']) ? ' HAVING ' . $params['having'] : '';
         $limit  = isset($params['limit']) ? ' LIMIT ' . $params['limit'] : '';
         if ($limit) {
             $limit .= isset($params['offset']) ? ' OFFSET ' . $params['offset'] : '';
         }
-        // TODO other operators...
-        $sql = 'SELECT * FROM `' . static::getTableName() . '`' . $where . $group . $order . $limit;
-        $pdoStatement = self::$pdo->prepare($sql);
+        // To build a complex sql query  then use other method, e.g. sqlFetch()
+
+        $sql = 'SELECT ' . $fields . ' FROM `' . static::getTableName() . '`' . $join . $where . $group . $having . $order . $limit;
+//        $pdoStatement = self::$pdo->prepare($sql);
+        $pdoStatement = static::getPdo()->prepare($sql);
         $pdoStatement->setFetchMode(PDO::FETCH_CLASS, static::class);
         $pdoStatement->execute();
 
@@ -256,7 +283,9 @@ class PdoRecord implements TableRecordInterface
      */
     public static function getPdoStatement(string $sql): bool|PDOStatement
     {
-        return self::$pdo->prepare($sql);
+//        $prepared = self::$pdo->prepare($sql);
+        $prepared = static::getPdo()->prepare($sql);
+        return $prepared ?: throw new RuntimeException('PDO statement could not be executed');
     }
 
     /*
@@ -264,7 +293,8 @@ class PdoRecord implements TableRecordInterface
      */
     public static function sqlFetchAll(string $sql, int $fetchMode = null, string $className = null): array
     {
-        $pdoStatement = self::$pdo->prepare($sql);
+//        $pdoStatement = self::$pdo->prepare($sql);
+        $pdoStatement = static::getPdo()->prepare($sql);
 
         if (is_null($fetchMode)) {
             $fetchMode = PDO::FETCH_BOTH;
@@ -286,7 +316,8 @@ class PdoRecord implements TableRecordInterface
      */
     public static function sqlFetch(string $sql, int $fetchMode = null, string $className = null)
     {
-        $pdoStatement = self::$pdo->prepare($sql);
+//        $pdoStatement = self::$pdo->prepare($sql);
+        $pdoStatement = static::getPdo()->prepare($sql);
 
         if (is_null($fetchMode)) {
             $fetchMode = PDO::FETCH_BOTH;
@@ -315,7 +346,8 @@ class PdoRecord implements TableRecordInterface
     {
         $where = isset($params['where']) ? 'WHERE ' . $params['where'] : '';
         $sql = 'SELECT COUNT(*) FROM `' . static::getTableName() . '` ' . $where . ';';
-        return (int)self::$pdo->query($sql)->fetchColumn();
+//        return (int)self::$pdo->query($sql)->fetchColumn();
+        return (int)static::getPdo()->query($sql)->fetchColumn();
     }
 
     /**
@@ -329,7 +361,8 @@ class PdoRecord implements TableRecordInterface
         $this->beforeDelete();
 
         $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName.'`=:' . static::$primaryKeyName;
-        $pdoStatement = self::$pdo->prepare($sql);
+//        $pdoStatement = self::$pdo->prepare($sql);
+        $pdoStatement = static::getPdo()->prepare($sql);
 
         // Only variables should be passed by reference
         $primaryKey = $this->getPrimaryKey();
@@ -348,14 +381,24 @@ class PdoRecord implements TableRecordInterface
      */
     public static function deleteAll(array $ids): bool
     {
-        if (empty($ids)) {
+        if ($ids === []) {
             return false;
         }
 
-        $idsString = self::getIdsForInCondtition($ids);
+        // Generate placeholders :id0, :id1, ...
+        $placeholders = [];
+        foreach ($ids as $index => $_) {
+            $placeholders[] = ':id' . $index;
+        }
 
-        $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '` in (' . $idsString . ');';
-        $pdoStatement = self::$pdo->prepare($sql);
+        $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '` IN (' . implode(', ', $placeholders) . ')';
+//        $pdoStatement = self::$pdo->prepare($sql);
+        $pdoStatement = static::getPdo()->prepare($sql);
+
+        // Binding values
+        foreach ($ids as $index => $id) {
+            $pdoStatement->bindValue(':id' . $index, $id, is_int($id) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
 
         return $pdoStatement->execute();
     }
@@ -371,16 +414,28 @@ class PdoRecord implements TableRecordInterface
      */
     public static function deleteAllWhereField(string $field, array $ids): bool
     {
-        if (empty($ids)) {
+        if ($ids === []) {
             return false;
         }
 
-        $idsString = self::getIdsForInCondtition($ids);
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $field)) {
+            throw new InvalidArgumentException('Invalid field name: ' . $field);
+        }
 
-        $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . $field . '` in (' . $idsString . ');';
-        $pdoStatement = self::$pdo->prepare($sql);
+        $placeholders = [];
+        foreach ($ids as $index => $_) {
+            $placeholders[] = ':id' . $index;
+        }
 
-        return $pdoStatement->execute();
+        $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . $field . '` IN (' . implode(', ', $placeholders) . ')';
+//        $stmt = self::$pdo->prepare($sql);
+        $stmt = static::getPdo()->prepare($sql);
+
+        foreach ($ids as $index => $id) {
+            $stmt->bindValue(':id' . $index, $id, is_int($id) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        return $stmt->execute();
     }
 
     /**
@@ -400,13 +455,15 @@ class PdoRecord implements TableRecordInterface
         $attributeNames = $this->getInsertingAvailableAttributes();
         $attributeBinds = $this->getInsertingAvailableAttributes(true);
         $sql = 'INSERT INTO `' . static::getTableName() . '` (' . $attributeNames . ') VALUES (' . $attributeBinds . ');';
-        $pdoStatement = self::$pdo->prepare($sql);
+//        $pdoStatement = self::$pdo->prepare($sql);
+        $pdoStatement = static::getPdo()->prepare($sql);
         $execute = $pdoStatement->execute($this->getInsertingAvailableValues());
 
         if (static::$isSequenceObjectId) {
             // https://www.php.net/manual/ru/pdo.lastinsertid.php
             // Returns the ID of the last inserted row, or the last value from a sequence object, depending on the underlying driver.
-            $this->{static::$primaryKeyName} = self::$pdo->lastInsertId();
+//            $this->{static::$primaryKeyName} = self::$pdo->lastInsertId();
+            $this->{static::$primaryKeyName} = static::getPdo()->lastInsertId();
         }
 
         return $execute;
@@ -425,34 +482,57 @@ class PdoRecord implements TableRecordInterface
         $updatingValues = $this->getUpdatingAvailableValues();
         $sql = 'UPDATE `' . static::getTableName() . '` SET ' . $updatingValues
             . ' WHERE `' . static::$primaryKeyName . '`="' . $this->getPrimaryKey() . '"';
-        $pdoStatement = self::$pdo->prepare($sql);
+//        $pdoStatement = self::$pdo->prepare($sql);
+        $pdoStatement = static::getPdo()->prepare($sql);
 
         if ($pdoStatement instanceof PDOStatement) {
-            $this->pdoStatement = $pdoStatement;
-            $this->bindAvailableValues();
-            return $this->pdoStatement->execute();
+//            $this->pdoStatement = $pdoStatement;
+//            $this->bindAvailableValues();
+//            return $this->pdoStatement->execute();
+
+            $this->bindAvailableValues($pdoStatement);
+            return $pdoStatement->execute();
         }
 
         return false;
     }
 
-    /**
-     * @param array{field: string, value: mixed} $data
-     */
     public function updateFields(array $data, bool $isBeforeUpdate = true): bool
     {
-        $isBeforeUpdate && $this->beforeUpdate();
-
-        $out = '';
-        foreach ($data as $attr => $value) {
-            $out .= $attr . '=:' . $value . ','; // string like title=:tile, ...
+        // Call hook before update if requested
+        if ($isBeforeUpdate) {
+            $this->beforeUpdate();
         }
-        $updatingAvailableValues = substr($out, 0, -1);
 
-        // TODO
+        // Prepare the SET part of the SQL query with named parameters
+        $setParts = [];
+        foreach ($data as $attr => $value) {
+            // Use named parameters for PDO binding, e.g. "title=:title"
+            $setParts[] = $attr . '=:' . $attr;
+        }
+        $setClause = implode(', ', $setParts);
 
-        return false;
+        // Build the full SQL update statement
+        $sql = 'UPDATE `' . static::getTableName() . '` SET ' . $setClause . ' WHERE `' . static::$primaryKeyName . '` = :primaryKey';
+
+        // Prepare the PDO statement
+        $pdoStatement = static::getPdo()->prepare($sql);
+        if (!$pdoStatement) {
+            return false;
+        }
+
+        // Bind values for all attributes
+        foreach ($data as $attr => $value) {
+            $pdoStatement->bindValue(':' . $attr, $value);
+        }
+
+        // Bind primary key value for WHERE condition
+        $pdoStatement->bindValue(':primaryKey', $this->getPrimaryKey());
+
+        // Execute the statement and return result
+        return $pdoStatement->execute();
     }
+
 
     /**
      * Insert or update model record on depended on primary key of model.
@@ -482,7 +562,7 @@ class PdoRecord implements TableRecordInterface
         foreach ($this->getAttributes() as $attr) {
             $out .= $isAddBindSeparator ? ':' . $attr . ',' : '`' . $attr . '`,';
         }
-        $out = substr($out, 0, -1);
+        $out = mb_substr($out, 0, -1);
 
         return $out;
     }
@@ -513,20 +593,20 @@ class PdoRecord implements TableRecordInterface
             $out .= '`' . $attr . '`' . '=:' . $attr . ',';
         }
 
-        return substr($out, 0, -1);
+        return mb_substr($out, 0, -1);
     }
 
     /**
      * Binds attributes and values.
      */
-    protected function bindAvailableValues(): void
+    protected function bindAvailableValues(PDOStatement $pdoStatement): void
     {
         foreach ($this->getAttributes() as $attr) {
             $value = $this->{$attr};
             if (is_string($value)) {
                 $value = self::getEscapeString($value);
             }
-            $this->pdoStatement->bindValue(':' . $attr, $value);
+            $pdoStatement->bindValue(':' . $attr, $value);
         }
     }
 
@@ -538,7 +618,7 @@ class PdoRecord implements TableRecordInterface
      *
      * @return string
      */
-    public static function getIdsForInCondtition(array $ids): string
+    public static function getIdsForInCondition(array $ids): string
     {
         $idsString = '';
         foreach ($ids as $id) {
@@ -546,7 +626,12 @@ class PdoRecord implements TableRecordInterface
             $idsString .= '"' . $id . '",';
         }
 
-        return substr($idsString, 0, -1);
+        return mb_substr($idsString, 0, -1);
+    }
+
+    public static function setHtmlEncodeOutput(bool $enabled): void
+    {
+        self::$htmlEncodeOutput = $enabled;
     }
 
     /**
@@ -558,8 +643,11 @@ class PdoRecord implements TableRecordInterface
      */
     protected static function getEscapeString(string $value): string
     {
-        // \SQLite3::escapeString($value); // hmm... it does not work as expect
-        // TODO reliable escape method
+        if (self::$htmlEncodeOutput) {
+            return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        }
+
+        // TODO: Unreliable escape method, probably make sense to use PDO::quote()
         return str_replace('"',"'", $value);
     }
 

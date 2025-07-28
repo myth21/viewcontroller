@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
-use \Exception;
-use \Traversable;
-use \RuntimeException;
+use Exception;
+use RuntimeException;
+use Traversable;
 
 /**
  * MIT License
@@ -16,6 +16,8 @@ use \RuntimeException;
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * Responsible for routing.
+ *
+ * TODO updating
  */
 class AltoRouter implements RouterInterface
 {
@@ -176,7 +178,7 @@ class AltoRouter implements RouterInterface
                 list($block, $pre, $type, $param, $optional) = $match;
 
                 if ($pre) {
-                    $block = substr($block, 1);
+                    $block = mb_substr($block, 1);
                 }
 
                 if (isset($params[$param])) {
@@ -211,11 +213,11 @@ class AltoRouter implements RouterInterface
         }
 
         // strip base path from request url
-        $requestUrl = substr($requestUrl, strlen($this->basePath));
+        $requestUrl = mb_substr($requestUrl, strlen($this->basePath));
 
         // Strip query string (?a=b) from Request Url
         if (($strpos = strpos($requestUrl, '?')) !== false) {
-            $requestUrl = substr($requestUrl, 0, $strpos);
+            $requestUrl = mb_substr($requestUrl, 0, $strpos);
         }
 
         $lastRequestUrlChar = $requestUrl ? $requestUrl[strlen($requestUrl)-1] : '';
@@ -240,7 +242,7 @@ class AltoRouter implements RouterInterface
                 $match = true;
             } elseif (isset($route[0]) && $route[0] === '@') {
                 // @ regex delimiter
-                $pattern = '`' . substr($route, 1) . '`u';
+                $pattern = '`' . mb_substr($route, 1) . '`u';
                 $match = preg_match($pattern, $requestUrl, $params) === 1;
             } elseif (($position = strpos($route, '[')) === false) {
                 // No params in url, do string comparison

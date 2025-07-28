@@ -10,48 +10,42 @@ namespace myth21\viewcontroller;
 abstract class WebController extends AbstractController
 {
     /**
-     * View file manager.
+     * View object to work with view/template files.
      */
-    protected ?ViewInterface $view = null;
+    protected ?View $view = null;
 
     /**
      * Web app object.
      */
     protected WebApp $app;
 
-    /**
-     * Response header object.
-     */
-    protected ResponseHeader $response;
+    public function __construct(WebApp $app)
+    {
+        $this->app = $app;
+        $this->init();
+    }
 
     /**
      * Redirect to concrete controller and action.
-     *
-     * @param string $controller
-     * @param string $action
      */
     protected function redirect(string $controller, string $action): void
     {
-        $url = $this->createUrl($controller, $action);
+        $url = $this->app->createUrl($controller, $action);
         $this->redirectTo($url);
     }
 
     /**
      * HTTP response redirect header.
-     *
-     * @param string|null $url
      */
-    protected function redirectTo(string $url = null): void
+    protected function redirectTo(string $url): void
     {
         $this->app->getResponseHeader()->redirect($url);
     }
 
     /**
-     * Set View.
-     *
-     * @param ViewInterface $view
+     * Set View object.
      */
-    public function setView(ViewInterface $view): void
+    public function setView(View $view): void
     {
         $this->view = $view;
     }

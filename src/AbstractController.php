@@ -9,19 +9,6 @@ namespace myth21\viewcontroller;
  */
 abstract class AbstractController
 {
-    use UrlQueryManagerTrait;
-
-    /**
-     * Controller constructor.
-     *
-     * @param AbstractApp|null $app
-     */
-    public function __construct(AbstractApp $app = null)
-    {
-        $this->app = $app;
-        $this->init();
-    }
-
     /**
      * Inits methods of child classes.
      */
@@ -29,5 +16,4 @@ abstract class AbstractController
     {
 
     }
-
 }

@@ -5,29 +5,30 @@ declare(strict_types=1);
 namespace myth21\viewcontroller;
 
 /**
- * Responsible for response headers.
+ * Responsible for managing HTTP response headers.
  */
 class ResponseHeader
 {
     /**
-     * Response headers.
+     * @var array<string> Headers as array string.
      */
     private array $headers = [];
 
     /**
-     * Response status code.
+     * HTTP status code (default 200 OK).
      */
     private int $statusCode = 200;
 
     /**
-     * Response status message.
+     * HTTP status message (optional).
      */
     private ?string $statusMessage = null;
 
     /**
-     * Set status code.
+     * Set HTTP status code.
      *
-     * @param int $code
+     * @param int $code HTTP status code (e.g., 200, 404)
+     * @return $this Fluent interface
      */
     public function setStatusCode(int $code): static
     {
@@ -36,9 +37,9 @@ class ResponseHeader
     }
 
     /**
-     * Set status message.
+     * Set HTTP status message.
      *
-     * @param string $message
+     * @param string $message Custom status message
      */
     public function setStatusMessage(string $message): void
     {
@@ -46,9 +47,7 @@ class ResponseHeader
     }
 
     /**
-     * Add response header as string, like 'Content-Type: application/json; charset=UTF-8'.
-     *
-     * @param string $header
+     * Add a response header string.
      */
     public function addHeader(string $header): void
     {
@@ -56,7 +55,7 @@ class ResponseHeader
     }
 
     /**
-     * Send response headers.
+     * Send all headers to the client.
      */
     public function sendHeaders(): void
     {
@@ -65,7 +64,7 @@ class ResponseHeader
         }
 
         foreach ($this->headers as $header) {
-            header((string)$header);
+            header($header);
         }
 
         $serverProtocol = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0';
@@ -74,10 +73,11 @@ class ResponseHeader
     }
 
     /**
-     * HTTP response redirect header.
+     * Redirect to given URL with specified HTTP status code.
+     * Immediately terminates script execution.
      *
-     * @param string $to
-     * @param int $code
+     * @param string $to URL to redirect to
+     * @param int $code HTTP status code (usually 301 or 302)
      */
     public function redirect(string $to = '', int $code = 301): void
     {
@@ -86,7 +86,9 @@ class ResponseHeader
     }
 
     /**
-     * Return header list.
+     * Get current headers as array.
+     *
+     * @return array<string>
      */
     public function getHeaders(): array
     {

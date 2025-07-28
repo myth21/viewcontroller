@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
+use myth21\viewcontroller\ResponseHeader;
+use Throwable;
 use function parse_url;
-
 use const PHP_URL_PATH;
 
 /**
@@ -45,7 +46,7 @@ class WebApp extends AbstractApp
     /***
      * Server session object.
      */
-    protected AbstractSession $session;
+    protected ?AbstractSession $session = null;
 
     /**
      * Response header object.
@@ -54,10 +55,8 @@ class WebApp extends AbstractApp
 
     /**
      * Class constructor.
-     *
-     * @param array $params
      */
-    public function __construct(protected array $params)
+    public function __construct(array $params)
     {
         parent::__construct($params);
 
@@ -66,6 +65,8 @@ class WebApp extends AbstractApp
 
     /**
      * Init params from HTTP request and server.
+     *
+     * @throws Throwable
      */
     public function defineRequestParams(): void
     {
@@ -90,13 +91,13 @@ class WebApp extends AbstractApp
      */
     protected function getControllerNameSpace(): string
     {
-        return $this->getParam('webControllerNameSpace');
+        return $this->getParam(AppParamInterface::WEB_CONTROLLER_NAMESPACE);
     }
 
     /**
      * Run web controller and return result of processing.
      */
-    protected function runController()
+    protected function runController(): mixed
     {
         $this->createController();
         $this->responseHeader = new ResponseHeader();
@@ -106,8 +107,6 @@ class WebApp extends AbstractApp
 
     /**
      * Send output content to requester.
-     *
-     * @param mixed $out
      */
     protected function out(mixed $out): void
     {
@@ -117,7 +116,7 @@ class WebApp extends AbstractApp
     }
 
     /**
-     * @return ResponseHeader
+     * Return response header object.
      */
     public function getResponseHeader(): ResponseHeader
     {
@@ -132,28 +131,25 @@ class WebApp extends AbstractApp
         return $this->isAjaxRequest;
     }
 
-    /**
-     * @return AbstractSession
-     */
     public function getSession(): AbstractSession
     {
+        if ($this->session === null) {
+            $this->session = AbstractSession::factory();
+        }
+
         return $this->session;
     }
 
     /**
      * Return request method name.
-     *
-     * @return string
      */
-    public function getRequestMethod(): string
+    public function getRequestMethod(): ?string
     {
         return $this->requestMethod;
     }
 
     /**
      * Return request URI.
-     *
-     * @return string
      */
     public function getRequestUri(): string
     {
@@ -162,12 +158,18 @@ class WebApp extends AbstractApp
 
     /**
      * Return request URI part.
-     *
-     * @return string
      */
     public function getRequestUriPath(): string
     {
         return $this->requestUriPath;
+    }
+
+    /**
+     * Check whether HEAD request.
+     */
+    public function isHeadRequest(): bool
+    {
+        return $this->requestMethod === static::HEAD_REQUEST_METHOD;
     }
 
     /**
@@ -192,6 +194,30 @@ class WebApp extends AbstractApp
     public function isPutRequest(): bool
     {
         return $this->requestMethod === static::PUT_REQUEST_METHOD;
+    }
+
+    /**
+     * Check whether PATCH request.
+     */
+    public function isPatchRequest(): bool
+    {
+        return $this->requestMethod === static::PATCH_REQUEST_METHOD;
+    }
+
+    /**
+     * Check whether CONNECT request.
+     */
+    public function isConnectRequest(): bool
+    {
+        return $this->requestMethod === static::CONNECT_REQUEST_METHOD;
+    }
+
+    /**
+     * Check whether TRACE request.
+     */
+    public function isTraceRequest(): bool
+    {
+        return $this->requestMethod === static::TRACE_REQUEST_METHOD;
     }
 
     /**
