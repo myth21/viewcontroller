@@ -13,19 +13,26 @@ use ReflectionException;
 use RuntimeException;
 
 /**
- * Class PdoRecord is PDO wrapper.
+ * Class PdoRecord is a base Active Record wrapper for PDO results.
  * Note: class is tested for working with SQLite only.
+ *
+ * This class is intended to be extended. Child classes should define
+ * an `id` property with the appropriate scalar type to represent the
+ * model's primary key. This base class provides the `getPrimaryKey()`
+ * method, which relies on that property being present.
+ *
+ * @property float|int|string|null $id Primary key of the record.
  */
 class PdoRecord implements PdoRecordInterface
 {
-    protected ?PDOStatement $pdoStatement = null;
+    //protected ?PDOStatement $pdoStatement = null;
     protected static ?string $dsn = null;
     protected static string $primaryKeyName = 'id';
 
     /**
      * Default value of primary field.
      */
-    protected null|int|float|string $id = null;
+//    protected null|int|float|string $id = null;
 
     /**
      * @link https://www.php.net/manual/en/pdo.lastinsertid.php
@@ -80,11 +87,16 @@ class PdoRecord implements PdoRecordInterface
     }
 
     /**
-     * Return value of primary table key.
+     * Returns the primary key value of the current record.
+     *
+     * This method relies on the child class to define a property named `$id`.
+     * It supports null, int, float, or string values to accommodate various primary key types.
+     *
+     * @return float|int|string|null The primary key of the record, or null if undefined.
      */
     public function getPrimaryKey(): float|int|string|null
     {
-        return $this->id;
+        return $this->id ?? null;
     }
 
     /**
