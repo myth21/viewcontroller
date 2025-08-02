@@ -39,7 +39,6 @@ class PdoRecord implements PdoRecordInterface
      */
     protected static bool $isSequenceObjectId = true;
 
-    protected static bool $htmlEncodeOutput = true;
 
     /**
      * Init this wrapper. Create PDO, set attributes and save link to him.
@@ -641,10 +640,6 @@ class PdoRecord implements PdoRecordInterface
         return mb_substr($idsString, 0, -1);
     }
 
-    public static function setHtmlEncodeOutput(bool $enabled): void
-    {
-        self::$htmlEncodeOutput = $enabled;
-    }
 
     /**
      * Return escaped string for secure inserting.
@@ -655,10 +650,6 @@ class PdoRecord implements PdoRecordInterface
      */
     protected static function getEscapeString(string $value): string
     {
-        if (self::$htmlEncodeOutput) {
-            return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-        }
-
         // TODO: Unreliable escape method, probably make sense to use PDO::quote()
         return str_replace('"',"'", $value);
     }

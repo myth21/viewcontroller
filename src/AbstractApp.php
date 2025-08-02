@@ -206,12 +206,8 @@ abstract class AbstractApp implements AppInterface
 
         $match = $this->router->match();
 
-        if (!$match) {
+        if (!$match || !is_array($match) || !isset($match['target']) || !is_callable($match['target'])) {
             throw new BadMethodCallException('Route not found', 404);
-        }
-
-        if (!is_array($match) && !is_callable($match['target'])) {
-            throw new BadMethodCallException('Route "' . $match . '" not found', 404);
         }
 
         return call_user_func_array($match['target'], $match['params']);
