@@ -587,7 +587,7 @@ class PdoRecord implements PdoRecordInterface
         foreach ($this->getAttributes() as $attr) {
             $value = $this->{$attr};
             if (is_string($value)) {
-                $value = self::getEscapeString($value);
+                //$value = self::getEscapeString($value);
             }
             $out[$attr] = $value;
         }
@@ -615,7 +615,7 @@ class PdoRecord implements PdoRecordInterface
         foreach ($this->getAttributes() as $attr) {
             $value = $this->{$attr};
             if (is_string($value)) {
-                $value = self::getEscapeString($value);
+                //$value = self::getEscapeString($value);
             }
             $pdoStatement->bindValue(':' . $attr, $value);
         }
@@ -643,6 +643,7 @@ class PdoRecord implements PdoRecordInterface
 
     /**
      * Return escaped string for secure inserting.
+     * @deprecated client must care about quotes, e.g. use
      *
      * @param string $value
      *
@@ -650,7 +651,6 @@ class PdoRecord implements PdoRecordInterface
      */
     protected static function getEscapeString(string $value): string
     {
-        // TODO: Unreliable escape method, probably make sense to use PDO::quote()
         return str_replace('"',"'", $value);
     }
 
