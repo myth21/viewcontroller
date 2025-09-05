@@ -252,6 +252,7 @@ class PdoRecord implements PdoRecordInterface
         }
         // To build a complex sql query  then use other method, e.g. sqlFetch()
 
+        // todo overwrite for placeholders because prepare it seems to me does not make sense?
         $sql = 'SELECT ' . $fields . ' FROM `' . static::getTableName() . '`' . $join . $where . $group . $having . $order . $limit;
 //        $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement = static::getPdo()->prepare($sql);
@@ -586,9 +587,7 @@ class PdoRecord implements PdoRecordInterface
         $out = [];
         foreach ($this->getAttributes() as $attr) {
             $value = $this->{$attr};
-            if (is_string($value)) {
-                //$value = self::getEscapeString($value);
-            }
+            // Probably if is_string($value) then make sense to call $value = self::getEscapeString($value) here
             $out[$attr] = $value;
         }
         return $out;
@@ -614,9 +613,7 @@ class PdoRecord implements PdoRecordInterface
     {
         foreach ($this->getAttributes() as $attr) {
             $value = $this->{$attr};
-            if (is_string($value)) {
-                //$value = self::getEscapeString($value);
-            }
+            // Probably if is_string($value) then make sense to call $value = self::getEscapeString($value) here
             $pdoStatement->bindValue(':' . $attr, $value);
         }
     }
@@ -642,16 +639,12 @@ class PdoRecord implements PdoRecordInterface
 
 
     /**
+     * Helper method.
      * Return escaped string for secure inserting.
-     * @deprecated client must care about quotes, e.g. use
-     *
-     * @param string $value
-     *
-     * @return string
+     * Ideally client must care about quotes self.
      */
     protected static function getEscapeString(string $value): string
     {
         return str_replace('"',"'", $value);
     }
-
 }

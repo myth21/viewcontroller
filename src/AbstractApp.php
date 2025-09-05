@@ -207,7 +207,8 @@ abstract class AbstractApp implements AppInterface
         $match = $this->router->match();
 
         if (!$match || !is_array($match) || !isset($match['target']) || !is_callable($match['target'])) {
-            throw new BadMethodCallException('Route not found', 404);
+            // 404 code is done to imitate not found, for console environment the same
+            throw new BadMethodCallException('Route "' . $match . '" not matched', 404);
         }
 
         return call_user_func_array($match['target'], $match['params']);
@@ -282,7 +283,8 @@ abstract class AbstractApp implements AppInterface
         // Using this function will use any registered autoloaders if the class has not already been known.
         // It uses psr-4.
         if (!method_exists($this->controllerClassName, $this->actionName)) {
-            $message = 'Action ' . $this->controllerClassName . '::' . $this->actionName . ' is not available to run';
+            $message = 'The action ' . $this->controllerClassName . '::' . $this->actionName . ' is not available to run';
+            // 404 code is done to imitate not found, for console environment the same
             throw new BadMethodCallException($message, 404);
         }
     }

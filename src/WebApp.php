@@ -29,12 +29,12 @@ class WebApp extends AbstractApp
     protected ?string $requestMethod = null;
 
     /**
-     * Request URI.
+     * Request URI, e.g. /photo-galleries/favorite?page=2&sort=desc#top
      */
     protected ?string $requestUri = null;
 
     /**
-     * Request URI path, part of URI.
+     * Request URI path, part of URI, e.g. /photo-galleries/favorite
      */
     protected ?string $requestUriPath = null;
 

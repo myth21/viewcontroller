@@ -58,7 +58,7 @@ class View
     {
         $viewFilePath = $this->absoluteTemplateDirName . $name . '.php';
         if (!is_readable($viewFilePath)) {
-            throw new RuntimeException('View file "' . $viewFilePath. '" not found');
+            throw new RuntimeException('The view file "' . $viewFilePath. '" has not been found');
         }
 
         ob_start();
@@ -112,7 +112,7 @@ class View
     public function renderFile(string $name, array $data = []): string
     {
         if (!is_readable($name)) {
-            throw new RuntimeException('View file "' . $name. '" not found');
+            throw new RuntimeException('The view file "' . $name. '" has not been found');
         }
 
         ob_start();
