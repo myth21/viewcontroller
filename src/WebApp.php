@@ -74,7 +74,8 @@ class WebApp extends AbstractApp
         $this->requestPostParams = $_POST;
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->requestUri = $_SERVER['REQUEST_URI'];
-        $this->requestUriPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $this->requestUriPath = $urlPath !== false ? $urlPath : '/';
         $this->isAjaxRequest = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
 
         if ($this->isCleanUrlApply() && $this->routes = $this->createRoutes()) {
