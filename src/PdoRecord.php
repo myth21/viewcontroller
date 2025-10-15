@@ -467,15 +467,32 @@ class PdoRecord implements PdoRecordInterface
         $attributeNames = $this->getInsertingAvailableAttributes();
         $attributeBinds = $this->getInsertingAvailableAttributes(true);
         $sql = 'INSERT INTO `' . static::getTableName() . '` (' . $attributeNames . ') VALUES (' . $attributeBinds . ');';
-//        $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement = static::getPdo()->prepare($sql);
         $execute = $pdoStatement->execute($this->getInsertingAvailableValues());
 
         if (static::$isSequenceObjectId) {
             // https://www.php.net/manual/ru/pdo.lastinsertid.php
             // Returns the ID of the last inserted row, or the last value from a sequence object, depending on the underlying driver.
-//            $this->{static::$primaryKeyName} = self::$pdo->lastInsertId();
-            $this->{static::$primaryKeyName} = static::getPdo()->lastInsertId();
+            //$this->{static::$primaryKeyName} = static::getPdo()->lastInsertId();
+
+            $id = static::getPdo()->lastInsertId();
+
+            if ($id !== false) {
+                $property = new \ReflectionProperty(static::class, static::$primaryKeyName);
+                $type = $property->getType();
+
+                if ($type) {
+                    $typeName = $type->getName();
+
+                    if ($typeName === 'int') {
+                        $id = (int) $id;
+                    } elseif ($typeName === 'float') {
+                        $id = (float) $id;
+                    }
+                }
+
+                $this->{static::$primaryKeyName} = $id;
+            }
         }
 
         return $execute;
