@@ -72,11 +72,6 @@ class View
 
     /**
      * Return file content with template, set got file content in template content.
-     *
-     * @param string $name
-     * @param array $data
-     *
-     * @return string
      */
     public function render(string $name, array $data = []): string
     {
@@ -103,11 +98,6 @@ class View
 
     /**
      * Return file content.
-     *
-     * @param string $name
-     * @param array $data
-     *
-     * @return string
      */
     public function renderFile(string $name, array $data = []): string
     {
@@ -125,9 +115,7 @@ class View
     }
 
     /**
-     * Set router.
-     *
-     * @param RouterInterface $router
+     * Set a router.
      */
     public function setRouter(RouterInterface $router): void
     {
@@ -137,9 +125,6 @@ class View
     /**
      * Return generated url resource by router.
      *
-     * @param string $routeName
-     * @param array $params
-     * @return string
      * @throws Exception
      */
     public function createRoute(string $routeName, array $params = []): string
@@ -169,10 +154,6 @@ class View
 
     /**
      * Return param was set in template file.
-     *
-     * @param string $key
-     *
-     * @return string|float|int|array|object|null
      */
     public function getTemplateParam(string $key): string|float|int|array|object|null
     {
@@ -181,8 +162,6 @@ class View
 
     /**
      * Return params were set in template file.
-     *
-     * @return array
      */
     public function getTemplateParams(): array
     {

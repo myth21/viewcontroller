@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller;
 
-use myth21\viewcontroller\ResponseHeader;
 use Throwable;
 use function parse_url;
 use const PHP_URL_PATH;

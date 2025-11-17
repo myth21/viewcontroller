@@ -16,7 +16,7 @@ interface RouterInterface
      * Generate the URL for a named route. Replace regexes with supplied parameters.
      *
      * @param string $routeName The name of the route.
-     * @param array @params Associative array of parameters to replace placeholders with.
+     * @param array $params Associative array of parameters to replace placeholders with.
      *
      * @throws Exception
      * @return string The URL of the route with named parameters in place.

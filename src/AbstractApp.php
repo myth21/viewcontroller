@@ -301,7 +301,7 @@ abstract class AbstractApp implements AppInterface
     }
 
     /**
-     * Return router.
+     * Return a router.
      */
     public function getRouter(): RouterInterface
     {

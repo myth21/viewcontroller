@@ -25,32 +25,20 @@ use RuntimeException;
  */
 class PdoRecord implements PdoRecordInterface
 {
-    //protected ?PDOStatement $pdoStatement = null;
     protected static ?string $dsn = null;
     protected static string $primaryKeyName = 'id';
-
-    /**
-     * Default value of primary field.
-     */
-//    protected null|int|float|string $id = null;
 
     /**
      * @link https://www.php.net/manual/en/pdo.lastinsertid.php
      */
     protected static bool $isSequenceObjectId = true;
 
-
     /**
      * Init this wrapper. Create PDO, set attributes and save link to him.
-     *
-     * @param string $dsn
-     * @param array $pdoAttributes
-     * @param array|null $options
      */
     public static function initPdo(string $dsn, array $pdoAttributes = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION], array $options = null): void
     {
         self::$dsn = $dsn;
-        //self::$pdo = new PDO($dsn, $options);
         $pdo = new PDO($dsn, $options);
 
         foreach ($pdoAttributes as $attr => $param) {
@@ -66,7 +54,6 @@ class PdoRecord implements PdoRecordInterface
     public static function getPdo(): ?PDO
     {
         return PdoRegistry::get();
-//        return self::$pdo;
     }
 
     /**
@@ -103,7 +90,7 @@ class PdoRecord implements PdoRecordInterface
      */
     protected function beforeInsert(): void
     {
-
+        // Overridable by child classes
     }
 
     /**
@@ -158,8 +145,6 @@ class PdoRecord implements PdoRecordInterface
      * Return attribute label.
      *
      * @param string $attr Attribute name.
-     *
-     * @return string
      */
     public static function getLabel(string $attr): string
     {
@@ -186,8 +171,6 @@ class PdoRecord implements PdoRecordInterface
 
     /**
      * Trying to determine the table name through subclass name (syntactic sugar).
-     *
-     * @throws ReflectionException
      */
     public static function getTableName(): string
     {
@@ -208,16 +191,10 @@ class PdoRecord implements PdoRecordInterface
 
     /**
      * Return subclass object by primary table key.
-     *
-     * @param string|int|float|null $primaryKey
-     *
-     * @return static|null
-     * @throws ReflectionException
      */
     public static function getPrimary(float|int|string $primaryKey): static|null
     {
         $sql = 'SELECT * FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '` = :primaryKey';
-//        $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement = static::getPdo()->prepare($sql);
         $pdoStatement->bindValue(':primaryKey', $primaryKey);
         $pdoStatement->setFetchMode(PDO::FETCH_CLASS, static::class);
@@ -250,11 +227,10 @@ class PdoRecord implements PdoRecordInterface
         if ($limit) {
             $limit .= isset($params['offset']) ? ' OFFSET ' . $params['offset'] : '';
         }
-        // To build a complex sql query  then use other method, e.g. sqlFetch()
+        // To build a complex sql query then use other method, e.g. sqlFetch()
 
         // todo overwrite for placeholders because prepare it seems to me does not make sense?
         $sql = 'SELECT ' . $fields . ' FROM `' . static::getTableName() . '`' . $join . $where . $group . $having . $order . $limit;
-//        $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement = static::getPdo()->prepare($sql);
         $pdoStatement->setFetchMode(PDO::FETCH_CLASS, static::class);
         $pdoStatement->execute();
@@ -295,7 +271,6 @@ class PdoRecord implements PdoRecordInterface
      */
     public static function getPdoStatement(string $sql): bool|PDOStatement
     {
-//        $prepared = self::$pdo->prepare($sql);
         $prepared = static::getPdo()->prepare($sql);
         return $prepared ?: throw new RuntimeException('PDO statement could not be executed');
     }
@@ -305,7 +280,6 @@ class PdoRecord implements PdoRecordInterface
      */
     public static function sqlFetchAll(string $sql, int $fetchMode = null, string $className = null): array
     {
-//        $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement = static::getPdo()->prepare($sql);
 
         if (is_null($fetchMode)) {
@@ -328,7 +302,6 @@ class PdoRecord implements PdoRecordInterface
      */
     public static function sqlFetch(string $sql, int $fetchMode = null, string $className = null)
     {
-//        $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement = static::getPdo()->prepare($sql);
 
         if (is_null($fetchMode)) {
@@ -348,32 +321,22 @@ class PdoRecord implements PdoRecordInterface
 
     /**
      * Return records count by params.
-     *
-     * @param array $params
-     *
-     * @return int
-     * @throws ReflectionException
      */
     public static function getCount(array $params = []): int
     {
         $where = isset($params['where']) ? 'WHERE ' . $params['where'] : '';
         $sql = 'SELECT COUNT(*) FROM `' . static::getTableName() . '` ' . $where . ';';
-//        return (int)self::$pdo->query($sql)->fetchColumn();
         return (int)static::getPdo()->query($sql)->fetchColumn();
     }
 
     /**
      * Delete record is related with current object (model).
-     *
-     * @return bool
-     * @throws ReflectionException
      */
     public function delete(): bool
     {
         $this->beforeDelete();
 
         $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName.'`=:' . static::$primaryKeyName;
-//        $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement = static::getPdo()->prepare($sql);
 
         // Only variables should be passed by reference
@@ -385,11 +348,6 @@ class PdoRecord implements PdoRecordInterface
 
     /**
      * Delete all records by scalar primary ids.
-     *
-     * @param array $ids
-     *
-     * @return bool
-     * @throws ReflectionException
      */
     public static function deleteAll(array $ids): bool
     {
@@ -404,7 +362,6 @@ class PdoRecord implements PdoRecordInterface
         }
 
         $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . static::$primaryKeyName . '` IN (' . implode(', ', $placeholders) . ')';
-//        $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement = static::getPdo()->prepare($sql);
 
         // Binding values
@@ -417,12 +374,6 @@ class PdoRecord implements PdoRecordInterface
 
     /**
      * Delete all records by field and scalar ids.
-     *
-     * @param string $field
-     * @param array $ids
-     *
-     * @return bool
-     * @throws ReflectionException
      */
     public static function deleteAllWhereField(string $field, array $ids): bool
     {
@@ -440,7 +391,6 @@ class PdoRecord implements PdoRecordInterface
         }
 
         $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `' . $field . '` IN (' . implode(', ', $placeholders) . ')';
-//        $stmt = self::$pdo->prepare($sql);
         $stmt = static::getPdo()->prepare($sql);
 
         foreach ($ids as $index => $id) {
@@ -454,7 +404,6 @@ class PdoRecord implements PdoRecordInterface
      * Insert model record.
      *
      * @throws ReflectionException
-     * @return bool
      */
     public function insert(): bool
     {
@@ -473,8 +422,6 @@ class PdoRecord implements PdoRecordInterface
         if (static::$isSequenceObjectId) {
             // https://www.php.net/manual/ru/pdo.lastinsertid.php
             // Returns the ID of the last inserted row, or the last value from a sequence object, depending on the underlying driver.
-            //$this->{static::$primaryKeyName} = static::getPdo()->lastInsertId();
-
             $id = static::getPdo()->lastInsertId();
 
             if ($id !== false) {
@@ -500,9 +447,6 @@ class PdoRecord implements PdoRecordInterface
 
     /**
      * Update model record.
-     *
-     * @return bool
-     * @throws ReflectionException
      */
     public function update(): bool
     {
@@ -511,14 +455,9 @@ class PdoRecord implements PdoRecordInterface
         $updatingValues = $this->getUpdatingAvailableValues();
         $sql = 'UPDATE `' . static::getTableName() . '` SET ' . $updatingValues
             . ' WHERE `' . static::$primaryKeyName . '`="' . $this->getPrimaryKey() . '"';
-//        $pdoStatement = self::$pdo->prepare($sql);
         $pdoStatement = static::getPdo()->prepare($sql);
 
         if ($pdoStatement instanceof PDOStatement) {
-//            $this->pdoStatement = $pdoStatement;
-//            $this->bindAvailableValues();
-//            return $this->pdoStatement->execute();
-
             $this->bindAvailableValues($pdoStatement);
             return $pdoStatement->execute();
         }
@@ -536,7 +475,6 @@ class PdoRecord implements PdoRecordInterface
         // Prepare the SET part of the SQL query with named parameters
         $setParts = [];
         foreach ($data as $attr => $value) {
-            // Use named parameters for PDO binding, e.g. "title=:title"
             $setParts[] = $attr . '=:' . $attr;
         }
         $setClause = implode(', ', $setParts);
@@ -566,7 +504,6 @@ class PdoRecord implements PdoRecordInterface
     /**
      * Insert or update model record on depended on primary key of model.
      *
-     * @return bool
      * @throws ReflectionException
      */
     public function save(): bool
@@ -580,10 +517,6 @@ class PdoRecord implements PdoRecordInterface
 
     /**
      * Return formatted available attributes for inserting.
-     *
-     * @param bool $isAddBindSeparator
-     *
-     * @return string
      */
     protected function getInsertingAvailableAttributes(bool $isAddBindSeparator = false): string
     {
@@ -634,26 +567,6 @@ class PdoRecord implements PdoRecordInterface
             $pdoStatement->bindValue(':' . $attr, $value);
         }
     }
-
-    /**
-     * Return formatted values for deleting, like 1,2,...
-     *
-     * @deprecated
-     * @param array $ids
-     *
-     * @return string
-     */
-    public static function getIdsForInCondition(array $ids): string
-    {
-        $idsString = '';
-        foreach ($ids as $id) {
-            // if $id is int then it will be converted to string, if you would like to us integers then us other method.
-            $idsString .= '"' . $id . '",';
-        }
-
-        return mb_substr($idsString, 0, -1);
-    }
-
 
     /**
      * Helper method.

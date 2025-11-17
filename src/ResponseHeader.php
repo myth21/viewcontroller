@@ -88,7 +88,7 @@ class ResponseHeader
     /**
      * Get current headers as array.
      *
-     * @return array<string>
+     * @return array<string, string>
      */
     public function getHeaders(): array
     {
