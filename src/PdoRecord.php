@@ -11,6 +11,9 @@ use PDOStatement;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
+use ReflectionProperty;
+use ReflectionNamedType;
+use ReflectionUnionType;
 
 /**
  * Class PdoRecord is a base Active Record wrapper for PDO results.
@@ -425,16 +428,27 @@ class PdoRecord implements PdoRecordInterface
             $id = static::getPdo()->lastInsertId();
 
             if ($id !== false) {
-                $property = new \ReflectionProperty(static::class, static::$primaryKeyName);
+                $property = new ReflectionProperty(static::class, static::$primaryKeyName);
                 $type = $property->getType();
 
-                if ($type) {
+                if ($type instanceof ReflectionNamedType) {
                     $typeName = $type->getName();
 
                     if ($typeName === 'int') {
                         $id = (int) $id;
                     } elseif ($typeName === 'float') {
                         $id = (float) $id;
+                    }
+                } elseif ($type instanceof ReflectionUnionType) {
+                    // For union types, prefer int if it is one of the types
+                    foreach ($type->getTypes() as $namedType) {
+                        if ($namedType->getName() === 'int') {
+                            $id = (int) $id;
+                            break;
+                        } elseif ($namedType->getName() === 'float') {
+                            $id = (float) $id;
+                            break;
+                        }
                     }
                 }
 
