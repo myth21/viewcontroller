@@ -155,7 +155,7 @@ class View
     /**
      * Return param was set in template file.
      */
-    public function getTemplateParam(string $key): string|float|int|array|object|null
+    public function getTemplateParam(string $key): string|float|int|array|object|null|bool
     {
         return $this->templateParams[$key] ?? null;
     }
