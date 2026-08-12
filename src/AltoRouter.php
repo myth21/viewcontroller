@@ -230,10 +230,8 @@ class AltoRouter implements RouterInterface
         foreach ($this->routes as $handler) {
             list($methods, $route, $target, $name) = $handler;
 
-            $method_match = (stripos($methods, $requestMethod) !== false);
-
             // Method did not match, continue to next route.
-            if (!$method_match) {
+            if (!$this->isMethodMatched($methods, $requestMethod)) {
                 continue;
             }
 
@@ -272,6 +270,29 @@ class AltoRouter implements RouterInterface
                     'params' => $params,
                     'name' => $name
                 ];
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether the request method is one of the methods a route is mapped to.
+     *
+     * A route declares its methods as a pipe-separated list ("HEAD|GET"), and each of them has to
+     * be compared as a whole. This used to be `stripos($methods, $requestMethod) !== false`, which
+     * asks something entirely different - whether the request method occurs anywhere inside that
+     * list as a substring. Any request whose method happened to be a substring of a mapped one was
+     * routed: `E` reached a DELETE route and deleted the record, `T` reached a PATCH route, and
+     * `get` reached a GET route, so a method filter in front of the app (proxy, firewall) could be
+     * walked straight past. Method names are case-sensitive per RFC 9110, so only the mapped side
+     * is normalised - that keeps a route written as "get" in a config working.
+     */
+    protected function isMethodMatched(string $methods, string $requestMethod): bool
+    {
+        foreach (explode('|', $methods) as $method) {
+            if (strtoupper(trim($method)) === $requestMethod) {
+                return true;
             }
         }
 

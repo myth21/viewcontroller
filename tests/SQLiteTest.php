@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace myth21\viewcontroller\tests;
 
+use InvalidArgumentException;
 use myth21\viewcontroller\PdoRecord;
 use PDO;
 use PHPUnit\Framework\TestCase;
@@ -115,6 +116,51 @@ class SQLiteTest extends TestCase
         $this->assertNotNull($model->getOne(['where' => SQLiteTest::TABLE_FIELD_NAME . ' = "' . SQLiteTest::PROJECT_NAME . '"']));
     }
 
+    public function testGetListWithBoundParams(): void
+    {
+        $model = $this->getModel();
+
+        $models = $model::getList([
+            'where' => '`' . SQLiteTest::TABLE_FIELD_NAME . '` = :name',
+            'params' => ['name' => SQLiteTest::PROJECT_NAME],
+        ]);
+
+        $this->assertCount(1, $models);
+        $this->assertNotNull($model::getOne([
+            'where' => '`id` = :id',
+            'params' => ['id' => SQLiteTest::ID],
+        ]));
+    }
+
+    public function testGetCountWithBoundParams(): void
+    {
+        $model = $this->getModel();
+
+        $this->assertEquals(1, $model::getCount([
+            'where' => '`id` = :id',
+            'params' => ['id' => SQLiteTest::ID],
+        ]));
+    }
+
+    /**
+     * A bound value is data, never SQL - concatenated into the `where` string the same input is
+     * executed, which is how a request parameter reaching a repository became an injection.
+     */
+    public function testBoundValueIsNotExecutedAsSql(): void
+    {
+        $model = $this->getModel();
+        $injection = 'x" OR 1=1 --';
+
+        $this->assertNull($model::getOne([
+            'where' => '`' . SQLiteTest::TABLE_FIELD_NAME . '` = :name',
+            'params' => ['name' => $injection],
+        ]));
+        $this->assertEquals(0, $model::getCount([
+            'where' => '`' . SQLiteTest::TABLE_FIELD_NAME . '` = :name',
+            'params' => ['name' => $injection],
+        ]));
+    }
+
     public function testSqlFetchAll(): void
     {
         $records = PdoRecord::sqlFetchAll('SELECT * FROM ' . SQLiteTest::TABLE_NAME);
@@ -154,6 +200,84 @@ class SQLiteTest extends TestCase
         $updatedModel = $dbModel::getPrimary(SQLiteTest::ID);
 
         $this->assertEquals($updateName, $updatedModel->getName());
+    }
+
+    /**
+     * The key used to be quoted into the statement. Interpolated, the value below reads as
+     * `WHERE id="1" OR "1"="1"` - true for every row - so one model rewrote the whole table.
+     */
+    public function testUpdateBindsPrimaryKey(): void
+    {
+        $model = $this->getModel();
+        $originalName = $model::getPrimary(SQLiteTest::ID)->getName();
+
+        $rogueModel = $this->getModel();
+        $reflectionProperty = new ReflectionProperty($rogueModel::class, 'id');
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue($rogueModel, '1" OR "1"="1');
+        $rogueModel->setName('overwritten');
+        $rogueModel->update();
+
+        $this->assertEquals($originalName, $model::getPrimary(SQLiteTest::ID)->getName());
+    }
+
+    public function testUpdateFields(): void
+    {
+        $model = $this->getModel();
+        $model->setName('Temp Name');
+        $model->insert();
+
+        $this->assertTrue($model->updateFields([SQLiteTest::TABLE_FIELD_NAME => 'Updated By Fields']));
+        $this->assertEquals('Updated By Fields', $model::getPrimary($model->getPrimaryKey())->getName());
+
+        $model->delete();
+    }
+
+    /**
+     * Column names cannot be bound, they are inlined - so a key that is not a plain name is refused
+     * instead of becoming SQL.
+     */
+    public function testUpdateFieldsRejectsInvalidFieldName(): void
+    {
+        $model = $this->getModel();
+        $dbModel = $model::getPrimary(SQLiteTest::ID);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $dbModel->updateFields([SQLiteTest::TABLE_FIELD_NAME . '` = "injected", `id' => 'x']);
+    }
+
+    /**
+     * lastInsertId() answers with a string. With a declared type the property keeps it (handled
+     * below by reflection), but an untyped `$id` used to hold that string, so a model fresh out of
+     * insert() differed from the same row read back - and `getId(): ?int` accessors raised a
+     * TypeError on it.
+     */
+    public function testInsertCastsNumericPrimaryKeyOfUntypedProperty(): void
+    {
+        $model = new class extends PdoRecord {
+            // Untyped on purpose - the case this test is about.
+            protected $id;
+            protected ?string $project_name = null;
+            public static function getAvailableAttributes(): array
+            {
+                return [SQLiteTest::TABLE_FIELD_NAME => 'Title'];
+            }
+            public static function getTableName(): string
+            {
+                return SQLiteTest::TABLE_NAME;
+            }
+            public function setName(string $value): void
+            {
+                $this->project_name = $value;
+            }
+        };
+        $model->setName('Untyped id');
+
+        $this->assertTrue($model->insert());
+        $this->assertIsInt($model->getPrimaryKey());
+
+        $model->delete();
     }
 
     public function testDelete(): void

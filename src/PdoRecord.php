@@ -32,6 +32,12 @@ class PdoRecord implements PdoRecordInterface
     protected static string $primaryKeyName = 'id';
 
     /**
+     * Placeholder name the primary key is bound under. Prefixed so that it cannot collide with a
+     * column of the same name, since attributes are bound as `:attributeName`.
+     */
+    private const PRIMARY_KEY_BIND_NAME = '__primaryKey';
+
+    /**
      * @link https://www.php.net/manual/en/pdo.lastinsertid.php
      */
     protected static bool $isSequenceObjectId = true;
@@ -212,6 +218,16 @@ class PdoRecord implements PdoRecordInterface
      * Return subclass objects (models) by params.
      * Method requires more conditions.
      *
+     * Values belong in `params`, never in the `where` string:
+     *
+     *     getList(['where' => '`email` = :email', 'params' => ['email' => $email]])
+     *
+     * Every clause below is inlined into the statement as written, so a value concatenated into
+     * `where` by a caller is executed as SQL - that is how a request parameter reaching a
+     * repository turns into an injection. `params` is handed to PDOStatement::execute(), which
+     * binds instead of interpolating. The clause keys themselves (fields, join, order, group,
+     * having, limit) are still raw SQL and must never be built from request data.
+     *
      * @param array $params
      *
      * @return static[]
@@ -232,11 +248,10 @@ class PdoRecord implements PdoRecordInterface
         }
         // To build a complex sql query then use other method, e.g. sqlFetch()
 
-        // todo overwrite for placeholders because prepare it seems to me does not make sense?
         $sql = 'SELECT ' . $fields . ' FROM `' . static::getTableName() . '`' . $join . $where . $group . $having . $order . $limit;
         $pdoStatement = static::getPdo()->prepare($sql);
         $pdoStatement->setFetchMode(PDO::FETCH_CLASS, static::class);
-        $pdoStatement->execute();
+        $pdoStatement->execute($params['params'] ?? null);
 
         $models = [];
         while($model = $pdoStatement->fetch()) {
@@ -256,7 +271,8 @@ class PdoRecord implements PdoRecordInterface
      */
     public static function getOne(array $params = []): ?static
     {
-        $list = self::getList($params);
+        // static, not self: a subclass overriding getList() must not be bypassed here.
+        $list = static::getList($params);
         if (!$list) {
             return null;
         }
@@ -280,8 +296,9 @@ class PdoRecord implements PdoRecordInterface
 
     /*
      * Return all records by clean sql.
+     * Pass values through $params (['id' => 1] for ':id'), not by concatenating them into $sql.
      */
-    public static function sqlFetchAll(string $sql, int $fetchMode = null, string $className = null): array
+    public static function sqlFetchAll(string $sql, int $fetchMode = null, string $className = null, array $params = null): array
     {
         $pdoStatement = static::getPdo()->prepare($sql);
 
@@ -295,15 +312,16 @@ class PdoRecord implements PdoRecordInterface
             $pdoStatement->setFetchMode($fetchMode);
         }
 
-        $pdoStatement->execute();
+        $pdoStatement->execute($params);
 
         return $pdoStatement->fetchAll();
     }
 
     /*
      * Return a record by clean sql.
+     * Pass values through $params (['id' => 1] for ':id'), not by concatenating them into $sql.
      */
-    public static function sqlFetch(string $sql, int $fetchMode = null, string $className = null)
+    public static function sqlFetch(string $sql, int $fetchMode = null, string $className = null, array $params = null)
     {
         $pdoStatement = static::getPdo()->prepare($sql);
 
@@ -317,19 +335,25 @@ class PdoRecord implements PdoRecordInterface
             $pdoStatement->setFetchMode($fetchMode);
         }
 
-        $pdoStatement->execute();
+        $pdoStatement->execute($params);
 
         return $pdoStatement->fetch();
     }
 
     /**
      * Return records count by params.
+     *
+     * Takes `where` and `params` the same way getList() does - see the note there on why values
+     * belong in `params`.
      */
     public static function getCount(array $params = []): int
     {
         $where = isset($params['where']) ? 'WHERE ' . $params['where'] : '';
         $sql = 'SELECT COUNT(*) FROM `' . static::getTableName() . '` ' . $where . ';';
-        return (int)static::getPdo()->query($sql)->fetchColumn();
+        $pdoStatement = static::getPdo()->prepare($sql);
+        $pdoStatement->execute($params['params'] ?? null);
+
+        return (int)$pdoStatement->fetchColumn();
     }
 
     /**
@@ -376,6 +400,21 @@ class PdoRecord implements PdoRecordInterface
     }
 
     /**
+     * Fail on anything that is not a plain column name.
+     *
+     * Column names cannot be bound, they are inlined into the statement - so wherever one comes
+     * from a caller it has to be checked here first.
+     *
+     * @throws InvalidArgumentException
+     */
+    protected static function assertFieldName(string $field): void
+    {
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $field)) {
+            throw new InvalidArgumentException('Invalid field name: ' . $field);
+        }
+    }
+
+    /**
      * Delete all records by field and scalar ids.
      */
     public static function deleteAllWhereField(string $field, array $ids): bool
@@ -384,9 +423,7 @@ class PdoRecord implements PdoRecordInterface
             return false;
         }
 
-        if (!preg_match('/^[a-zA-Z0-9_]+$/', $field)) {
-            throw new InvalidArgumentException('Invalid field name: ' . $field);
-        }
+        static::assertFieldName($field);
 
         $placeholders = [];
         foreach ($ids as $index => $_) {
@@ -422,7 +459,9 @@ class PdoRecord implements PdoRecordInterface
         $pdoStatement = static::getPdo()->prepare($sql);
         $execute = $pdoStatement->execute($this->getInsertingAvailableValues());
 
-        if (static::$isSequenceObjectId) {
+        // Nothing was written, so there is no key to read - and lastInsertId() would answer with
+        // whatever the previous statement on this connection produced.
+        if ($execute && static::$isSequenceObjectId) {
             // https://www.php.net/manual/ru/pdo.lastinsertid.php
             // Returns the ID of the last inserted row, or the last value from a sequence object, depending on the underlying driver.
             $id = static::getPdo()->lastInsertId();
@@ -450,6 +489,12 @@ class PdoRecord implements PdoRecordInterface
                             break;
                         }
                     }
+                } elseif ($type === null && is_numeric($id)) {
+                    // An untyped `$id` used to keep the string lastInsertId() returns, so a model
+                    // straight out of insert() differed from the same row read back from the
+                    // database - and every `getId(): ?int` accessor on it raised a TypeError. The
+                    // declared type is honoured above wherever there is one; this is the fallback.
+                    $id = (int) $id;
                 }
 
                 $this->{static::$primaryKeyName} = $id;
@@ -467,12 +512,17 @@ class PdoRecord implements PdoRecordInterface
         $this->beforeUpdate();
 
         $updatingValues = $this->getUpdatingAvailableValues();
+        // The primary key is bound like every other value. Quoting it into the statement was safe
+        // only as long as it came from the database; a key taken from a request (a route parameter
+        // assigned to the model) was executed as SQL.
         $sql = 'UPDATE `' . static::getTableName() . '` SET ' . $updatingValues
-            . ' WHERE `' . static::$primaryKeyName . '`="' . $this->getPrimaryKey() . '"';
+            . ' WHERE `' . static::$primaryKeyName . '` = :' . self::PRIMARY_KEY_BIND_NAME;
         $pdoStatement = static::getPdo()->prepare($sql);
 
         if ($pdoStatement instanceof PDOStatement) {
             $this->bindAvailableValues($pdoStatement);
+            $pdoStatement->bindValue(':' . self::PRIMARY_KEY_BIND_NAME, $this->getPrimaryKey());
+
             return $pdoStatement->execute();
         }
 
@@ -489,7 +539,10 @@ class PdoRecord implements PdoRecordInterface
         // Prepare the SET part of the SQL query with named parameters
         $setParts = [];
         foreach ($data as $attr => $value) {
-            $setParts[] = $attr . '=:' . $attr;
+            // Values are bound below, but the column names are inlined - so they have to be
+            // names and nothing else. Without this a $data key was free SQL.
+            static::assertFieldName((string)$attr);
+            $setParts[] = '`' . $attr . '`=:' . $attr;
         }
         $setClause = implode(', ', $setParts);
 

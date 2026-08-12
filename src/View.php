@@ -6,7 +6,11 @@ namespace myth21\viewcontroller;
 
 use Exception;
 use RuntimeException;
+use Throwable;
 use function is_readable;
+use function is_string;
+use function preg_match;
+use function str_starts_with;
 use const EXTR_OVERWRITE;
 
 /**
@@ -56,18 +60,7 @@ class View
      */
     public function renderPart(string $name, array $data = []): string
     {
-        $viewFilePath = $this->absoluteTemplateDirName . $name . '.php';
-        if (!is_readable($viewFilePath)) {
-            throw new RuntimeException('The view file "' . $viewFilePath. '" has not been found');
-        }
-
-        ob_start();
-        ob_implicit_flush(false);
-        // Do not use extract() on untrusted data, like user input (e.g. $_GET, $_FILES).
-        extract($data, EXTR_OVERWRITE);
-        require $viewFilePath;
-
-        return ob_get_clean();
+        return $this->requireFile($this->absoluteTemplateDirName . $name . '.php', $data);
     }
 
     /**
@@ -78,22 +71,7 @@ class View
         $this->content = $this->renderPart($name, $data);
 
         // Warning: variables will be replaced in template from template part.
-        $viewFilePath = $this->absoluteTemplateDirName . $this->templateFileName . '.php';
-
-        // Filtering, delete vars like: '1invalid', 'GLOBALS', 'my-var'
-        foreach ($data as $key => $value) {
-            if (!preg_match('/^[a-zA-Z_]\w*$/', $key)) {
-                unset($data[$key]);
-            }
-        }
-
-        ob_start();
-        ob_implicit_flush(false);
-        // Do not use extract() on untrusted data, like user input (e.g. $_GET, $_FILES).
-        extract($data, EXTR_OVERWRITE);
-        require $viewFilePath;
-
-        return ob_get_clean();
+        return $this->requireFile($this->absoluteTemplateDirName . $this->templateFileName . '.php', $data);
     }
 
     /**
@@ -101,17 +79,61 @@ class View
      */
     public function renderFile(string $name, array $data = []): string
     {
-        if (!is_readable($name)) {
-            throw new RuntimeException('The view file "' . $name. '" has not been found');
+        return $this->requireFile($name, $data);
+    }
+
+    /**
+     * Include a view file and return what it printed.
+     *
+     * Locals here are __-prefixed and template data may not use that prefix (see
+     * filterVariableNames()): the path being included is a local variable, and extract() with
+     * EXTR_OVERWRITE replaces locals - so a data key named after one of them decided which file
+     * got included. `renderFile($path, ['name' => 'Ivan'])` was enough to hit it.
+     */
+    protected function requireFile(string $__filePath, array $__data): string
+    {
+        if (!is_readable($__filePath)) {
+            throw new RuntimeException('The view file "' . $__filePath . '" has not been found');
         }
 
         ob_start();
         ob_implicit_flush(false);
-        // Do not use extract() on untrusted data, like user input (e.g. $_GET, $_FILES).
-        extract($data, EXTR_OVERWRITE);
-        require $name;
 
-        return ob_get_clean();
+        try {
+            // Do not use extract() on untrusted data, like user input (e.g. $_GET, $_FILES).
+            extract(self::filterVariableNames($__data), EXTR_OVERWRITE);
+            require $__filePath;
+
+            return (string)ob_get_clean();
+        } catch (Throwable $e) {
+            // Leaving the buffer open would swallow whatever is printed after this.
+            ob_end_clean();
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Drop keys that cannot become a variable, and keys reserved for this class's own locals.
+     *
+     * @param array<array-key, mixed> $data
+     * @return array<string, mixed>
+     */
+    private static function filterVariableNames(array $data): array
+    {
+        foreach ($data as $key => $value) {
+            // Filtering, delete vars like: '1invalid', 'GLOBALS', 'my-var'
+            if (!is_string($key) || !preg_match('/^[a-zA-Z_]\w*$/', $key)) {
+                unset($data[$key]);
+                continue;
+            }
+
+            if (str_starts_with($key, '__')) {
+                unset($data[$key]);
+            }
+        }
+
+        return $data;
     }
 
     /**
