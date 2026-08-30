@@ -4,6 +4,10 @@
     "keywords": ["php", "mvc", "framework", "viewcontroller", "library", "microframework"],
     "homepage": "https://github.com/myth21/viewcontroller",
     "license": "MIT",
+    "support": {
+        "issues": "https://github.com/myth21/viewcontroller/issues",
+        "source": "https://github.com/myth21/viewcontroller/tree/master"
+    },
     "authors": [
         {
             "name": "Ivan M.",
